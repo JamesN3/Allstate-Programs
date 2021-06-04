@@ -39,8 +39,11 @@ with open(
     with open(
         "C:/Users/Public/Documents/Jamie's Work Folder/new_July2021.csv", "w"
     ) as new_file:
-        csv_writer = csv.writer(new_file, delimiter=",")
+        csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         for line in csv_reader:
+            check = True
             for compare_value in compare_list:
-                if compare_value.lower() != line[2].lower():
-                    csv_writer.writerow(line)
+                if compare_value == line[2].lower():
+                    check = False
+            if check == True:
+                csv_writer.writerow(line)
