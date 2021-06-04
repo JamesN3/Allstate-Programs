@@ -29,13 +29,11 @@ for row in range(1, row_count):
             else:
                 compare_list.append(cell)
 
-print(compare_list)
-
 with open(
     "C:/Users/Public/Documents/Jamie's Work Folder/July2021.csv", "r"
 ) as csv_file:
-    csv_reader = csv.reader(csv_file)
 
+    csv_reader = csv.reader(csv_file)
     next(csv_reader)
 
     with open(
