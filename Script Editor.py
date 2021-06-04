@@ -23,9 +23,9 @@ for row in range(1, row_count):
                 while "*" in cell:
                     # Fix Logic
                     for i in range(0, 10):
-                        copy_str = cell
-                        copy_str.replace("*", str(i))
+                        copy_str = cell.replace("*", str(i), 1)
                         compare_list.append(copy_str)
+                    cell = copy_str
             else:
                 compare_list.append(cell)
 
