@@ -14,20 +14,20 @@ compare_list = []
 
 for row in range(1, row_count):
     for column in range(1, column_count):
-        # Cell value is giving the location of in the csv
+
         cell = str(sheet.cell(row=row, column=column).value).lower()
-        # Does not work as intended
+
         if cell != "none":
-            # Does not work as intended
-            if "*" in cell == False:
-                compare_list.append(cell)
-            else:
-                # While statement does not work as intended
-                while "*" in cell == True:
+
+            if "*" in cell:
+                while "*" in cell:
+                    # Fix Logic
                     for i in range(0, 10):
                         copy_str = cell
                         copy_str.replace("*", str(i))
                         compare_list.append(copy_str)
+            else:
+                compare_list.append(cell)
 
 print(compare_list)
 
