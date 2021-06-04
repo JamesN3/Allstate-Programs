@@ -34,7 +34,6 @@ with open(
 ) as csv_file:
 
     csv_reader = csv.reader(csv_file)
-    next(csv_reader)
 
     with open(
         "C:/Users/Public/Documents/Jamie's Work Folder/new_July2021.csv", "w"
