@@ -14,16 +14,22 @@ compare_list = []
 
 for row in range(1, row_count):
     for column in range(1, column_count):
-        cell = str(sheet.cell(row=row, column=column))
-        if cell != None:
+        # Cell value is giving the location of in the csv
+        cell = str(sheet.cell(row=row, column=column).value).lower()
+        # Does not work as intended
+        if cell != "none":
+            # Does not work as intended
             if "*" in cell == False:
                 compare_list.append(cell)
             else:
+                # While statement does not work as intended
                 while "*" in cell == True:
                     for i in range(0, 10):
                         copy_str = cell
                         copy_str.replace("*", str(i))
                         compare_list.append(copy_str)
+
+print(compare_list)
 
 with open(
     "C:/Users/Public/Documents/Jamie's Work Folder/July2021.csv", "r"
