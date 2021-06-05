@@ -25,6 +25,24 @@ for row in range(1, row_count):
                         copy_str = cell.replace("*", str(i), 1)
                         compare_list.append(copy_str)
                     cell = copy_str
+            if "*" in cell:
+                countaster = cell.count('*')
+                if (countaster == 1):
+                    for i in range(0, 10):
+                        copy_str = cell.replace("*", str(i), 1)
+                        compare_list.append(copy_str)
+                if (countaster == 2):
+                    copy_str = []
+                    for i in range(0, 10):
+                        copy_str.append(cell.replace("*", str(i), 1))
+                    for i in range (0,100):
+                        copy_str[i] = cell.replace("*", str(i), 1)
+                    compare_list.extend(copy_str)
+                if (countaster == 3):
+                    copy_str = []
+                    
+                if (countaster == 4):
+                
             else:
                 compare_list.append(cell)
 
