@@ -6,7 +6,27 @@ compare_path = str(
         "Please give me the file path to the excel sheet you are comparing your csv to. Include file name and ending(e.x: .xlsx)\n"
     )
 )
-# Generate list of addresses in FIlter street names
+
+original_path = str(
+    input(
+        "Please give me the file path to the csv file you are scanning for repeats. Include file name and ending(e.x: .csv)\n"
+    )
+)
+
+what_line = int(
+    input(
+        "Please give me the line in the csv you are comparing. Include file name and ending(e.x: .csv)\n"
+    )
+)
+
+new_path = str(
+    input(
+        "Please give me the file path to the new csv file you are creating. Include file name and ending(e.x: .csv)\n"
+    )
+)
+
+
+# Generate list of addresses in Filter street names
 wb = pyxl.load_workbook(
     compare_path,
 )
@@ -44,20 +64,16 @@ for row in range(1, row_count):
                 compare_list.append(cell)
 
 
-with open(
-    "C:/Users/Public/Documents/Jamie's Work Folder/July2021.csv", "r"
-) as csv_file:
+with open(original_path, "r") as csv_file:
 
     csv_reader = csv.reader(csv_file)
 
-    with open(
-        "C:/Users/Public/Documents/Jamie's Work Folder/new_July2021.csv", "w"
-    ) as new_file:
+    with open(new_path, "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         for line in csv_reader:
             check = True
             for compare_value in compare_list:
-                if compare_value == line[2].lower():
+                if compare_value == line[what_line].lower():
                     check = False
             if check == True:
                 csv_writer.writerow(line)
