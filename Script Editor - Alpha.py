@@ -1,6 +1,5 @@
 import csv
 import openpyxl as pyxl
-import tkinter as tk
 
 compare_path = str(
     input(
