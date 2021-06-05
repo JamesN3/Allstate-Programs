@@ -1,6 +1,13 @@
 import csv
 import openpyxl as pyxl
-import tkinter as tk
+from tkinter import *
+
+root = Tk()
+
+myLabel1 = Label(root, text="Welcome!")
+compare_path_button = Button(
+    root, text="Enter path for compare excel sheet", command=myClick
+)
 
 compare_path = str(
     input(
@@ -26,7 +33,7 @@ new_path = str(
     )
 )
 
-
+root.mainloop()
 # Generate list of addresses in Filter street names
 wb = pyxl.load_workbook(
     compare_path,
