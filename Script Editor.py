@@ -20,12 +20,19 @@ for row in range(1, row_count):
         if cell != "none":
 
             if "*" in cell:
+                count = cell.count("*")
                 for i in range(0, 10):
-                    value = cell.replace("*", str(i), 1)
-                    for z in range(0, 10):
-                        appendValue = value.replace("*", str(z), 1)
-                        for k in range(0, 10):
-                            compare_list.append(appendValue.replace("*", str(z), 1))
+                    value1 = cell.replace("*", str(i), 1)
+                    if count == 1:
+                        compare_list.append(value1)
+                    else:
+                        for z in range(0, 10):
+                            value2 = value1.replace("*", str(z), 1)
+                            if count == 2:
+                                compare_list.append(value2)
+                            else:
+                                for k in range(0, 10):
+                                    compare_list.append(value2.replace("*", str(z), 1))
             else:
                 compare_list.append(cell)
 
