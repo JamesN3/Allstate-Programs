@@ -38,7 +38,6 @@ for row in range(1, row_count):
 
 # Recursive method
 
-
 with open(
     "C:/Users/Public/Documents/Jamie's Work Folder/July2021.csv", "r"
 ) as csv_file:
