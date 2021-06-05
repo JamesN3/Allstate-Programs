@@ -20,14 +20,17 @@ for row in range(1, row_count):
         if cell != "none":
 
             if "*" in cell:
-                while "*" in cell:
-                    # Fix Logic
-                    for i in range(0, 10):
-                        copy_str = cell.replace("*", str(i), 1)
-                        compare_list.append(copy_str)
-                    cell = copy_str
+                for i in range(0, 10):
+                    value = cell.replace("*", str(i), 1)
+                    for z in range(0, 10):
+                        appendValue = value.replace("*", str(z), 1)
+                        for k in range(0, 10):
+                            compare_list.append(appendValue.replace("*", str(z), 1))
             else:
                 compare_list.append(cell)
+
+# Recursive method
+
 
 with open(
     "C:/Users/Public/Documents/Jamie's Work Folder/July2021.csv", "r"
