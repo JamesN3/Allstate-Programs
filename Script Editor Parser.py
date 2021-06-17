@@ -42,6 +42,5 @@ with open(
                     elif "*" in cell:
                         if compare(cell, line[2].lower()):
                             check = False
-                            print(line)
             if check == True:
                 csv_writer.writerow(line)
