@@ -11,22 +11,38 @@ def compare(x, y):
     return False
 
 
-with open("C:/Users/jamie/Downloads/August2021.csv", "r") as original_file:
+# Opens file that is being filtered
+# Contains all customer data
+print("All files must be csv")
+file_original = input(
+    "Please input csv file name for customer csv list. Omit csv endtag\n"
+)
+filter_list = input("Please input csv file name with filter list. Omit csv endtag\n")
+
+with open(f"C:/Users/jamie/Downloads/{file_original}.csv", "r") as original_file:
 
     csv_reader = csv.reader(original_file)
     next(csv_reader)
-    # Writes to new csv file with values omitted
-    with open("C:/Users/jamie/Downloads/new_August2021.csv", "w") as new_file:
+
+    # Writes to new csv file with filter value rows omitted
+    # Reconstructs orginal file, omitting filtered
+    with open(f"C:/Users/jamie/Downloads/new_{file_original}.csv", "w") as new_file:
+
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
-        # Writes to new file previous csv file but first checks if value should be added to csv
+
+        # Writes to new file with the rows that are omitted
         with open(
-            "C:/Users/jamie/Downloads/omit_new_August2021.csv", "w"
+            f"C:/Users/jamie/Downloads/omit_new_{file_original}.csv", "w"
         ) as new_file_omit:
             csv_writer_omit = csv.writer(
                 new_file_omit, delimiter=",", lineterminator="\n"
             )
             for line in csv_reader:
-                with open("C:/Users/jamie/Downloads/Filter List.csv") as csv_filter:
+
+                # Take csv file that is being compared
+                with open(
+                    f"C:/Users/jamie/Downloads/{filter_list}.csv", "r"
+                ) as csv_filter:
                     csv_checker = csv.reader(csv_filter)
                     check = True
                     for line_checker in csv_checker:
