@@ -1,13 +1,4 @@
 import csv
-import openpyxl as pyxl
-
-wb = pyxl.load_workbook(
-    "C:/Users/jamie/Downloads/Marketing Calendar 2011-2021.xlsx", "r"
-)
-sheet = wb["Filter List"]
-
-row_count = sheet.max_row
-column_count = sheet.max_column
 
 
 def compare(x, y):
@@ -20,9 +11,9 @@ def compare(x, y):
     return False
 
 
-with open("C:/Users/jamie/Downloads/August2021.csv", "r") as csv_file:
+with open("C:/Users/jamie/Downloads/August2021.csv", "r") as original_file:
 
-    csv_reader = csv.reader(csv_file)
+    csv_reader = csv.reader(original_file)
     next(csv_reader)
     # Writes to new csv file with values omitted
     with open("C:/Users/jamie/Downloads/new_August2021.csv", "w") as new_file:
@@ -35,16 +26,19 @@ with open("C:/Users/jamie/Downloads/August2021.csv", "r") as csv_file:
                 new_file_omit, delimiter=",", lineterminator="\n"
             )
             for line in csv_reader:
-                check = True
-                for row in range(1, row_count):
-                    for column in range(1, column_count):
-                        cell = str(sheet.cell(row=row, column=column).value).lower()
-                        if "*" not in cell and cell in line[2].lower():
+                with open("C:/Users/jamie/Downloads/Filter List.csv") as csv_filter:
+                    csv_checker = csv.reader(csv_filter)
+                    check = True
+                    for line_checker in csv_checker:
+                        element = str(line_checker[0]).lower()
+                        if "*" not in element and element in line[2].lower():
                             check = False
                             csv_writer_omit.writerow(line)
-                        elif "*" in cell:
-                            if compare(cell, line[2].lower()):
+                            break
+                        elif "*" in element:
+                            if compare(element, line[2].lower()):
                                 check = False
                                 csv_writer_omit.writerow(line)
+                                break
                 if check == True:
                     csv_writer.writerow(line)

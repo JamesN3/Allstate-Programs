@@ -55,7 +55,7 @@ with open(
         for line in csv_reader:
             check = True
             for compare_value in compare_list:
-                if compare_value == line[2].lower():
+                if compare_value in line[2].lower():
                     check = False
             if check == True:
                 csv_writer.writerow(line)
