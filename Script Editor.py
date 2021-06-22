@@ -22,7 +22,8 @@ filter_list = input("Please input csv file name with filter list. Omit csv endta
 with open(f"C:/Users/jamie/Downloads/{file_original}.csv", "r") as original_file:
 
     csv_reader = csv.reader(original_file)
-    next(csv_reader)
+    x = True
+    first_line = next(csv_reader)
 
     # Writes to new csv file with filter value rows omitted
     # Reconstructs orginal file, omitting filtered
@@ -43,6 +44,10 @@ with open(f"C:/Users/jamie/Downloads/{file_original}.csv", "r") as original_file
                 with open(
                     f"C:/Users/jamie/Downloads/{filter_list}.csv", "r"
                 ) as csv_filter:
+                    if x:
+                        csv_writer.writerow(first_line)
+                        csv_writer_omit.writerow(first_line)
+                        x = False
                     csv_checker = csv.reader(csv_filter)
                     check = True
                     for line_checker in csv_checker:
