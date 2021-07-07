@@ -11,9 +11,7 @@ source1 = requests.get(
 )
 
 pin_id = source1.json()["items"][0]["PIN"]
-# https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin=3630200160
-# "PROPNAME": {"Single Family Residence"}
-# https://devqa.io/python-parse-json/
+
 
 source2 = requests.get(
     f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
