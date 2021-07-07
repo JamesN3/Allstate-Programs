@@ -9,7 +9,7 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
     first_line = next(csv_reader)
     with open(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv", "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
-        first_line.append("Property Name")
+        first_line.append("Present Use")
         csv_writer.writerow(first_line)
         for line in csv_reader:
             address = str(line[2])
