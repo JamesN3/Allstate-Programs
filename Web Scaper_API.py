@@ -3,11 +3,12 @@ import csv
 import json
 
 
-word = "1458 26th AVE NE"
-word = word.replace(" ", "%")
+address = "910 NE High St, Issaquah, WA 98029"
+
+address = address.replace(" ", "%20")
 
 source1 = requests.get(
-    "https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add=1458%2026th%20ave%20NE"
+    f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
 )
 
 pin_id = source1.json()["items"][0]["PIN"]
