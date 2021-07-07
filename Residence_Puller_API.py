@@ -1,7 +1,6 @@
 import requests
 import csv
 
-
 csv_name = str(input("Type in name of csv file\n"))
 
 with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
@@ -30,10 +29,10 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
             if proper:
                 residence = str(source2.json()["items"][0]["PRESENTUSE"])
                 if residence == "":
-                    residence = "Not Avaliable"
+                    residence = "Not Avaliable(Empty)"
                 line.append(residence)
                 csv_writer.writerow(line)
             else:
                 print(line)
-                line.append("Not Avaliable")
+                line.append("Not Avaliable(DNE)")
                 csv_writer.writerow(line)
