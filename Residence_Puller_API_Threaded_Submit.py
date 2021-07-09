@@ -3,11 +3,16 @@ import csv
 import concurrent.futures
 import pandas as pd
 
+
 csv_name = str(input("Type in name of csv file\n"))
-csv_data = pd.read_csv(csv_name)
-address_column = csv_data[2].tolist()
 # Currently does not have return statement
-def add_list(address):
+pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv")
+max_rows = len(pd_csv)
+
+
+def add_list(csv_reader, csv_writer):
+    line = next(csv_reader)
+    address = str(line[2])
     proper = True
     # Needs to be updated to work with more query searches
     address = address.replace(" ", "%20")
@@ -26,13 +31,11 @@ def add_list(address):
         residence = str(source2.json()["items"][0]["PRESENTUSE"])
         if residence == "":
             residence = "Not Avaliable(Empty)"
-        print(line)
         line.append(residence)
-        return line
+        csv_writer.writerow(line)
     else:
-        print(line)
         line.append("Not Avaliable(DNE)")
-        return line
+        csv_writer.writerow(line)
 
 
 with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
@@ -42,8 +45,9 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
         csv_writer.writerow(first_line)
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            csv_writer.writerow(executor.map(add_list, address_column))
+        for _ in range(max_rows - 1):
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(add_list, csv_reader, csv_writer)
 
 # Check if residential status is mixed with
 
