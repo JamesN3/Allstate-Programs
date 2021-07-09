@@ -1,17 +1,12 @@
 import requests
 import csv
 import concurrent.futures
-import pandas as pd
 
 
 csv_name = str(input("Type in name of csv file\n"))
-# Currently does not have return statement
-pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv")
-max_rows = len(pd_csv)
 
 
-def add_list(csv_reader, csv_writer):
-    line = next(csv_reader)
+def add_list(line, csv_writer):
     address = str(line[2])
     proper = True
     # Needs to be updated to work with more query searches
@@ -45,9 +40,9 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
         csv_writer.writerow(first_line)
-        for _ in range(max_rows - 1):
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.submit(add_list, csv_reader, csv_writer)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            for line in csv_reader:
+                executor.submit(add_list, line, csv_writer)
 
 # Check if residential status is mixed with
 
