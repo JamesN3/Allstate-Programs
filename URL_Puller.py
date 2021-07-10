@@ -4,11 +4,6 @@ import concurrent.futures
 import pandas as pd
 from bs4 import BeautifulSoup
 
-
-source = requests.get(
-    "http://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN=3630200160"
-).text
-print(source)
 csv_name = str(input("Type in name of csv file\n"))
 pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/{csv_name}.csv")
 
@@ -37,7 +32,7 @@ def add_list(address):
             source2 = requests.get(
                 f"https://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN={pin_id}"
             ).text
-            soup = BeautifulSoup(source, "lxml")
+            soup = BeautifulSoup(source2, "lxml")
             parcel = soup.find("span", id="DistrictsReportControl1_lblPIN")
             source3 = requests.get(
                 f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={parcel}"
@@ -55,7 +50,7 @@ def add_list(address):
 with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
-    with open(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv", "w") as new_file:
+    with open(f"C:/Users/jamie/Downloads/updated_URL_{csv_name}.csv", "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("URL")
         csv_writer.writerow(first_line)

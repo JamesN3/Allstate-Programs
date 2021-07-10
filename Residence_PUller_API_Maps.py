@@ -55,4 +55,3 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for result in executor.map(add_list, address_list):
                 csv_writer.writerow(result)
-                print(result)
