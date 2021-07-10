@@ -2,7 +2,13 @@ import requests
 import csv
 import concurrent.futures
 import pandas as pd
+from bs4 import BeautifulSoup
 
+
+source = requests.get(
+    "http://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN=3630200160"
+).text
+print(source)
 csv_name = str(input("Type in name of csv file\n"))
 pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/{csv_name}.csv")
 
@@ -30,8 +36,9 @@ def add_list(address):
             pin_id = source1.json()["items"][0]["PIN"]
 
             source2 = requests.get(
-                f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
+                f"https://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN={pin_id}"
             )
+
         except:
             proper = False
         if proper:
