@@ -21,7 +21,6 @@ def add_list(address):
         line = next(csv_reader_1)
         row_val += 1
         proper = True
-        # Needs to be updated to work with more query searches
         address = address.replace(" ", "%20")
         try:
             source1 = requests.get(

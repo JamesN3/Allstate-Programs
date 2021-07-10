@@ -27,7 +27,6 @@ def add_list(address):
         line = next(csv_reader_1)
         row_val += 1
         proper = True
-        # Needs to be updated to work with more query searches
         address = address.replace(" ", "%20")
         try:
             source1 = requests.get(
@@ -37,19 +36,19 @@ def add_list(address):
 
             source2 = requests.get(
                 f"https://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN={pin_id}"
-            )
-
+            ).text
+            soup = BeautifulSoup(source, "lxml")
+            parcel = soup.find("span", id="DistrictsReportControl1_lblPIN")
+            source3 = requests.get(
+                f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={parcel}"
+            ).url
         except:
             proper = False
         if proper:
-            residence = str(source2.json()["items"][0]["PRESENTUSE"])
-            if residence == "":
-                residence = "Not Avaliable(Empty)"
-            line.append(residence)
+            line.append(str(source3))
             return line
         else:
-            residence = "Not Avaliable(DNE)"
-            line.append(residence)
+            line.append("Not Avaliable")
             return line
 
 
@@ -58,7 +57,7 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
     first_line = next(csv_reader)
     with open(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv", "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
-        first_line.append("Present Use")
+        first_line.append("URL")
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for result in executor.map(add_list, address_list):
