@@ -10,13 +10,11 @@ pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/{csv_name}.csv")
 
 address_list = pd_csv["Address"].tolist()
 
-row_starter = int(input("Which row should we start reading from\n"))
-row_val = row_starter
+row_val = 0
 
 
 def add_list(address):
     global row_val
-    global row_starter
 
     with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
         csv_reader_1 = csv.reader(csv_file)
@@ -24,55 +22,21 @@ def add_list(address):
         for _ in range(row_val):
             next(csv_reader_1)
         line = next(csv_reader_1)
-        if row_val - row_starter > 1000:
-            time.sleep(60)
-            exit()
         row_val += 1
-        proper = True
         address = address.replace(" ", "%20")
         try:
             source1 = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
             )
             pin_id = source1.json()["items"][0]["PIN"]
-            source2 = requests.get(
-                f"https://www5.kingcounty.gov/kcgisreports/dd_report.aspx?PIN={pin_id}"
-            ).text
-            soup = BeautifulSoup(source2, "lxml")
-            parcel = soup.find("span", id="DistrictsReportControl1_lblPIN").text
-            source3 = requests.get(
-                f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={parcel}"
-            ).url
+            source3 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
         except:
-            proper = False
-        if (
-            proper
-            and source3
-            != "https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-        ):
-            line.append(str(source3))
-            return line
-        elif (
-            source3
-            == "https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-        ):
             line.append(
                 "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
             )
             return line
-        elif (
-            source3
-            == "https://blue.kingcounty.com/Assessor/eRealProperty/ExceedCount.aspx"
-        ):
-            line.append(
-                "Error(MAX DAILY) — Refer to https://blue.kingcounty.com/Assessor/eRealProperty/ExceedCount.aspx"
-            )
-            return line
-        else:
-            line.append(
-                "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-            )
-            return line
+        line.append(str(source3))
+        return line
 
 
 with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
