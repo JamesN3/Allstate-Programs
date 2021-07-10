@@ -48,7 +48,9 @@ def add_list(address):
 with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
-    with open(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv", "w") as new_file:
+    with open(
+        f"C:/Users/jamie/Downloads/updated_Residency_{csv_name}.csv", "w"
+    ) as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
         csv_writer.writerow(first_line)
