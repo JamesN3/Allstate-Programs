@@ -2,8 +2,6 @@ import requests
 import csv
 import concurrent.futures
 import pandas as pd
-from bs4 import BeautifulSoup
-import time
 
 csv_name = str(input("Type in name of csv file\n"))
 pd_csv = pd.read_csv(f"C:/Users/jamie/Downloads/{csv_name}.csv")
