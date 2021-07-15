@@ -27,13 +27,13 @@ def add_list(address):
                 f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
             )
             pin_id = source1.json()["items"][0]["PIN"]
-            source3 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+            source2 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
         except:
             line.append(
                 "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
             )
             return line
-        line.append(str(source3))
+        line.append(str(source2))
         return line
 
 
