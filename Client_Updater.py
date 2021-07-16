@@ -2,27 +2,36 @@ import requests
 import csv
 import concurrent.futures
 import pandas as pd
+from os import path
 
-print("\nOutput file will be in same folder as input file")
+print(
+    "\nOutput file will be in same folder as input file\nNew file name will be "
+    "new_{file_name}.csv"
+    ""
+)
 
-file_path = str(
+PATH = str(
     input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
 )
-pd_csv = pd.read_csv(file_path)
-last_index = file_path.rfind("\\")
-print(last_index)
-new_file_path = file_path[0 : last_index + 1] + "new_" + file_path[last_index + 1 :]
+while not path.exists(PATH):
+    print("Error with file path, check it is correct and compare with example")
+    PATH = str(
+        input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
+    )
+pd_csv = pd.read_csv(PATH)
+last_index = PATH.rfind("\\")
+new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 address_list = pd_csv["Address"].tolist()
 
 row_val = 1
 
-# C:/Users/jamie/Downloads/new_August2021.csv
+# C:\Users\jamie\Downloads\new_August2021.csv
 
 
 def add_list(address):
     global row_val
 
-    with open(file_path, "r") as csv_file:
+    with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         for _ in range(row_val):
             next(csv_reader)
@@ -49,10 +58,10 @@ def add_list(address):
         return line
 
 
-with open(file_path, "r") as csv_file:
+with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
-    with open(new_file_path, "w") as new_file:
+    with open(new_PATH, "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
         first_line.append("URL")
