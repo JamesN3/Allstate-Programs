@@ -27,16 +27,16 @@ new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 
 
 row_val = 1
-# C:\Users\jamie\Downloads\Sept2021.csv
+C:\Users\jamie\Downloads\Sept2021.csv
 
-# with open(PATH, "r") as csv_file:
-#     csv_reader = csv.reader(csv_file)
-#     first_line = next(csv_reader)
-#     while
-#         num_square_ft = 0
-#         for line in csv_reader:
-#             if int(line[8]) <= 1750:
-#                 num_square_ft += 1
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    first_line = next(csv_reader)
+    while
+        num_square_ft = 0
+        for line in csv_reader:
+            if int(line[8]) <= 1750:
+                num_square_ft += 1
 
 
 def add_list(address):
@@ -58,30 +58,29 @@ def add_list(address):
             source2 = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
             ).json()["items"][0]["PRESENTUSE"]
-            source3 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
             square_true = False
             if square_ft <= 1750:
                 try:
                     square_true = True
-                    source4 = requests.get(
+                    source3 = requests.get(
                         f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
                     ).text
-                    soup = BeautifulSoup(source4, "lxml")
+                    soup = BeautifulSoup(source3, "lxml")
                     table = soup.find_all("table", class_="GridViewStyle")[1]
                     tr = table.find("tr", class_="GridViewAlternatingRowStyle")
                     new_square_ft = tr.find_all("td")[1].text
                 except:
                     new_square_ft = "Error"
+            source4 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
         except:
-            for _ in range(2):
-                line.append(
-                    "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-                )
+            line.append(
+                "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
+            )
             return line
         line.append(str(source2))
-        line.append(str(source3))
         if square_true:
             line.append(str(new_square_ft))
+        line.append(str(source4))
         return line
 
 
@@ -91,8 +90,8 @@ with open(PATH, "r") as csv_file:
     with open(new_PATH, "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
+        first_line.append("Real Square Footage")
         first_line.append("URL")
-        first_line.append("Accurate Home Size")
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for result in executor.map(add_list, address_list):
