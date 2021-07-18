@@ -37,32 +37,33 @@ def square_call(square_bar):
             if int(line[8]) <= square_bar:
                 num_square_ft += 1
         if num_square_ft < 940:
-            square_call(square_bar + 10)
+            return square_call(square_bar + 10)
         elif num_square_ft >= 999:
-            square_call(square_bar - 10)
+            return square_call(square_bar - 10)
         else:
             return square_bar
 
 
-def square_call():
-    with open(PATH, "r") as csv_file:
-        csv_reader = csv.reader(csv_file)
-        next(csv_reader)
-        square_bar = 1750
-        num_square_ft = 0
-        for line in csv_reader:
-            if int(line[8]) <= square_bar:
-                num_square_ft += 1
-        if num_square_ft < 940:
-            square_call(square_bar + 10)
-        elif num_square_ft >= 999:
-            square_call(square_bar - 10)
-        else:
-            return square_bar
+square_bar = square_call(1750)
+
+# while True:
+#     with open(PATH, "r") as csv_file:
+#         csv_reader = csv.reader(csv_file)
+#         next(csv_reader)
+#         num_square_ft = 0
+#         for line in csv_reader:
+#             if int(line[8]) <= square_bar:
+#                 num_square_ft += 1
+#             if num_square_ft < 1000:
+#                 square_bar += 10
+#             else:
+#                 square_bar -= 10
+#                     break
 
 
 def add_list(address):
     global row_val
+    global square_bar
 
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -80,28 +81,30 @@ def add_list(address):
             source2 = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
             ).json()["items"][0]["PRESENTUSE"]
-            square_true = False
-            if square_ft <= square_bar:
-                try:
-                    square_true = True
-                    source3 = requests.get(
-                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
-                    ).text
-                    soup = BeautifulSoup(source3, "lxml")
-                    table = soup.find_all("table", class_="GridViewStyle")[1]
-                    tr = table.find("tr", class_="GridViewAlternatingRowStyle")
-                    new_square_ft = tr.find_all("td")[1].text
-                except:
-                    new_square_ft = "Error"
             source4 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
         except:
             line.append(
                 "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
             )
             return line
+        square_true = False
+        if square_ft <= square_bar:
+            try:
+                square_true = True
+                source3 = requests.get(
+                    f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
+                ).text
+                soup = BeautifulSoup(source3, "lxml")
+                table = soup.find_all("table", class_="GridViewStyle")[1]
+                tr = table.find("tr", class_="GridViewAlternatingRowStyle")
+                new_square_ft = tr.find_all("td")[1].text
+            except:
+                new_square_ft = "Error"
         line.append(str(source2))
         if square_true:
             line.append(str(new_square_ft))
+        else:
+            line.append("———")
         line.append(str(source4))
         return line
 
@@ -115,8 +118,8 @@ with open(PATH, "r") as csv_file:
         first_line.append("Real Square Footage")
         first_line.append("URL")
         csv_writer.writerow(first_line)
-        square_bar = square_call()
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            for result in executor.map(add_list, address_list):
-                csv_writer.writerow(result)
+            # for address in executor.map(lambda: add_list(address_list), square_bar):
+            for address in executor.map(add_list, address_list):
+                csv_writer.writerow(address)
 print("Finished!")
