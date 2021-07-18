@@ -25,18 +25,38 @@ address_list = pd_csv["Address"].tolist()
 last_index = PATH.rfind("\\")
 new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 
-
 row_val = 1
-C:\Users\jamie\Downloads\Sept2021.csv
 
-with open(PATH, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    first_line = next(csv_reader)
-    while
-        num_square_ft = 0
-        for line in csv_reader:
-            if int(line[8]) <= 1750:
-                num_square_ft += 1
+def square_call(square_bar):
+    with open(PATH, "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+        while True:
+            num_square_ft = 0
+            for line in csv_reader:
+                if int(line[8]) <= square_bar:
+                    num_square_ft += 1
+            if (num_square_ft < 980):
+                square_call(square_bar + 10)
+            if (num_square_ft >= 980):
+                square_call(square_bar - 10)
+                
+def square_call():
+    with open(PATH, "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+        square_bar = 1750
+        while True:
+            num_square_ft = 0
+            for line in csv_reader:
+                if int(line[8]) <= square_bar:
+                    num_square_ft += 1
+            if (num_square_ft < 980):
+                square_bar += 10;
+            if (num_square_ft >= 980):
+                square_bar -= 10
+        
+            
 
 
 def add_list(address):
@@ -59,7 +79,7 @@ def add_list(address):
                 f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
             ).json()["items"][0]["PRESENTUSE"]
             square_true = False
-            if square_ft <= 1750:
+            if square_ft <= square_bar:
                 try:
                     square_true = True
                     source3 = requests.get(
