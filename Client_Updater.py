@@ -31,31 +31,32 @@ def square_call(square_bar):
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)
-        while True:
             num_square_ft = 0
             for line in csv_reader:
                 if int(line[8]) <= square_bar:
                     num_square_ft += 1
-            if (num_square_ft < 980):
+            if (num_square_ft < 940):
                 square_call(square_bar + 10)
-            if (num_square_ft >= 980):
+            elif (num_square_ft >= 999):
                 square_call(square_bar - 10)
+            else:
+                return square_bar
                 
 def square_call():
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)
         square_bar = 1750
-        while True:
             num_square_ft = 0
             for line in csv_reader:
                 if int(line[8]) <= square_bar:
                     num_square_ft += 1
-            if (num_square_ft < 980):
-                square_bar += 10;
-            if (num_square_ft >= 980):
-                square_bar -= 10
-        
+            if (num_square_ft < 940):
+                square_call(square_bar += 10)
+            elif (num_square_ft >= 999):
+                square_call(square_bar -= 10)
+            else:
+                return square_bar
             
 
 
@@ -113,6 +114,7 @@ with open(PATH, "r") as csv_file:
         first_line.append("Real Square Footage")
         first_line.append("URL")
         csv_writer.writerow(first_line)
+        square_bar = square_call()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for result in executor.map(add_list, address_list):
                 csv_writer.writerow(result)
