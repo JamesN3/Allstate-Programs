@@ -27,37 +27,38 @@ new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 
 row_val = 1
 
+
 def square_call(square_bar):
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)
-            num_square_ft = 0
-            for line in csv_reader:
-                if int(line[8]) <= square_bar:
-                    num_square_ft += 1
-            if (num_square_ft < 940):
-                square_call(square_bar + 10)
-            elif (num_square_ft >= 999):
-                square_call(square_bar - 10)
-            else:
-                return square_bar
-                
+        num_square_ft = 0
+        for line in csv_reader:
+            if int(line[8]) <= square_bar:
+                num_square_ft += 1
+        if num_square_ft < 940:
+            square_call(square_bar + 10)
+        elif num_square_ft >= 999:
+            square_call(square_bar - 10)
+        else:
+            return square_bar
+
+
 def square_call():
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)
         square_bar = 1750
-            num_square_ft = 0
-            for line in csv_reader:
-                if int(line[8]) <= square_bar:
-                    num_square_ft += 1
-            if (num_square_ft < 940):
-                square_call(square_bar += 10)
-            elif (num_square_ft >= 999):
-                square_call(square_bar -= 10)
-            else:
-                return square_bar
-            
+        num_square_ft = 0
+        for line in csv_reader:
+            if int(line[8]) <= square_bar:
+                num_square_ft += 1
+        if num_square_ft < 940:
+            square_call(square_bar + 10)
+        elif num_square_ft >= 999:
+            square_call(square_bar - 10)
+        else:
+            return square_bar
 
 
 def add_list(address):
