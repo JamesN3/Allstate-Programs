@@ -28,25 +28,7 @@ new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 row_val = 1
 
 
-def square_call(square_bar):
-    with open(PATH, "r") as csv_file:
-        csv_reader = csv.reader(csv_file)
-        next(csv_reader)
-        num_square_ft = 0
-        for line in csv_reader:
-            if int(line[8]) <= square_bar:
-                num_square_ft += 1
-        if num_square_ft < 940:
-            return square_call(square_bar + 10)
-        elif num_square_ft >= 999:
-            return square_call(square_bar - 10)
-        else:
-            return square_bar
-
-
-square_bar = square_call(1750)
-
-# while True:
+# def square_call(square_bar):
 #     with open(PATH, "r") as csv_file:
 #         csv_reader = csv.reader(csv_file)
 #         next(csv_reader)
@@ -54,11 +36,30 @@ square_bar = square_call(1750)
 #         for line in csv_reader:
 #             if int(line[8]) <= square_bar:
 #                 num_square_ft += 1
-#             if num_square_ft < 1000:
-#                 square_bar += 10
-#             else:
-#                 square_bar -= 10
-#                     break
+#         if num_square_ft < 940:
+#             return square_call(square_bar + 10)
+#         elif num_square_ft >= 999:
+#             return square_call(square_bar - 10)
+#         else:
+#             return square_bar
+
+
+# square_bar = square_call(1750)
+# Multiprocessing?
+square_bar = 0
+while True:
+    with open(PATH, "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        next(csv_reader)
+        num_square_ft = 0
+        for line in csv_reader:
+            if int(line[8]) < square_bar:
+                num_square_ft += 1
+        if num_square_ft < 1000:
+            square_bar += 10
+        else:
+            square_bar -= 10
+            break
 
 
 def add_list(address):
@@ -77,6 +78,42 @@ def add_list(address):
             source1 = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
             )
+        except:
+            passthrough = False
+            if " mt " in address.lower():
+                address = address.lower().replace("mt", "mount")
+                passthrough = True
+            if " woodinvl " in address.lower():
+                address = address.lower().replace("woodinvl", "woodinville")
+                passthrough = True
+            if " sunbreak " in address.lower():
+                address = address.lower().replace("sunbreak", "sun break")
+                passthrough = True
+            if " shr " in address.lower():
+                address = address.lower().replace("shr", "shore")
+                passthrough = True
+            if " cntry " in address.lower():
+                address = address.lower().replace("cntry", "country")
+                passthrough = True
+            if " clb " in address.lower():
+                address = address.lower().replace("clb", "club")
+                passthrough = True
+
+            if not passthrough:
+                source1 = requests.get(
+                    f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
+                )
+                pin_id = source1.json()["items"][0]["PIN"]
+                source2 = requests.get(
+                    f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
+                ).json()["items"][0]["PRESENTUSE"]
+                source4 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+            else:
+                line.append(
+                    "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
+                )
+                return line
+        try:
             pin_id = source1.json()["items"][0]["PIN"]
             source2 = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
@@ -119,7 +156,6 @@ with open(PATH, "r") as csv_file:
         first_line.append("URL")
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            # for address in executor.map(lambda: add_list(address_list), square_bar):
             for address in executor.map(add_list, address_list):
                 csv_writer.writerow(address)
 print("Finished!")
