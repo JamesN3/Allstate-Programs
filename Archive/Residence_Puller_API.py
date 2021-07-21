@@ -9,6 +9,7 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
     with open(f"C:/Users/jamie/Downloads/updated_{csv_name}.csv", "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         first_line.append("Present Use")
+        first_line.append("URL")
         csv_writer.writerow(first_line)
         for line in csv_reader:
             address = str(line[2])
@@ -24,6 +25,7 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
                 source2 = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
                 )
+                url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
             except:
                 proper = False
             if proper:
@@ -31,8 +33,8 @@ with open(f"C:/Users/jamie/Downloads/{csv_name}.csv", "r") as csv_file:
                 if residence == "":
                     residence = "Not Avaliable(Empty)"
                 line.append(residence)
+                line.append(url)
                 csv_writer.writerow(line)
             else:
-                print(line)
                 line.append("Not Avaliable(DNE)")
                 csv_writer.writerow(line)
