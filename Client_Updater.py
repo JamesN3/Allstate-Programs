@@ -117,23 +117,26 @@ def add_list(address, row_val):
                 return line
         if passthrough:
             if square_ft <= square_bar:
+
                 try:
                     source = requests.get(
                         f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
                     ).text
                     soup = BeautifulSoup(source, "lxml")
                     table1 = soup.find("table", id="TABLE1")
-                    table2 = table1.find_all("table", class_="GridViewStyle")[4]
-                    tr = table2.find_all("tr", class_="GridViewAlternatingRowStyle")[1]
-                    header = tr.find_all("td")[0].text
-                    new_square_ft = tr.find_all("td")[1].text
+                    table2 = table1.find_all("table", class_="GridViewStyle")[13]
+                    tr = table2.find_all("tr", class_="GridViewAlternatingRowStyle")
+                    for value in tr:
+                        tester = value.find_all("td")[0].text.lower()
+                        print(tester)
+                        if tester == "avg unit size" or tester == "total finished area":
+                            header = value.find_all("td")[0].text
+                            new_square_ft = value.find_all("td")[1].text
+
                 except:
                     new_square_ft = "-Error-"
                     header = "Error"
-                if header.lower() == "land sqft":
-                    line.append(str(new_square_ft))
-                else:
-                    line.append("-Error-")
+                line.append(str(new_square_ft))
             else:
                 line.append("---")
         line.append(present_use)
