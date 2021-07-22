@@ -77,13 +77,18 @@ def add_list(address, row_val):
         address = address.replace(" ", "%20")
         square_ft = int(line[8])
         try:
-            source1 = requests.get(
+            pin_id = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
-            )
+            ).json()["items"][0]["PIN"]
+            present_use = requests.get(
+                f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
+            ).json()["items"][0]["PRESENTUSE"]
+            url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
         except:
             address = address.lower()
             passthrough = False
             abb_dict = {
+                "mt": "mountain",
                 "mount": "mt",
                 "woodinvl": "woodinville",
                 "sunbreak": "sun break",
@@ -99,25 +104,19 @@ def add_list(address, row_val):
                     address = address.replace(abbreviation, full)
                     passthrough = True
             if passthrough:
-                source1 = requests.get(
+                pin_id = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
-                )
-                pin_id = source1.json()["items"][0]["PIN"]
-                source2 = requests.get(
+                ).json()["items"][0]["PIN"]
+                present_use = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
                 ).json()["items"][0]["PRESENTUSE"]
-                source3 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+                url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
             else:
                 line.append(error_message)
-        try:
-            pin_id = source1.json()["items"][0]["PIN"]
-            source2 = requests.get(
-                f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-            ).json()["items"][0]["PRESENTUSE"]
-            source3 = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
-        except:
-            line.append(error_message)
-            return line
+                return line
+        line.append(present_use)
+        line.append(url)
+        return line
         # square_true = False
         # if square_ft <= square_bar:
         #     try:
@@ -131,13 +130,10 @@ def add_list(address, row_val):
         #         new_square_ft = tr.find_all("td")[1].text
         #     except:
         #         new_square_ft = "Error"
-        line.append(str(source2))
         # if square_true:
         #     line.append(str(new_square_ft))
         # else:
         #     line.append("———")
-        line.append(str(source3))
-        return line
 
 
 num_list = list(range(1, len(address_list) + 1))
