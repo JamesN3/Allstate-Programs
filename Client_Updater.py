@@ -152,7 +152,11 @@ def add_list(address, row_val):
         # Takes square_ft data from clients
         square_ft = int(line[8])
         if square_ft <= square_bar:
-            if "condo" not in present_use.lower():
+            if (
+                "condo" not in present_use.lower()
+                or "apartment" not in present_use.lower()
+                or "mobile home" not in present_use.lower()
+            ):
                 try:
                     # Takes request for square footage
                     source = requests.get(
