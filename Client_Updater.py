@@ -1,4 +1,4 @@
-# Author: James Ngai
+# Author: James Ngai(Allstate "HALE INSURANCE, INC.")
 # Program built solely for the use of Allstate Hale Insurance Inc
 #
 # Program takes prexisting client data and adds the client's
