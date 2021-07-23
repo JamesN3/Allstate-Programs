@@ -8,7 +8,7 @@ import requests
 import csv
 import concurrent.futures
 import pandas as pd
-from os import path
+from os import path, remove
 from bs4 import BeautifulSoup
 
 # Message is to inform user about program operations
@@ -37,8 +37,8 @@ df = pd.read_csv(PATH)
 address_list = df["Address"].tolist()
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
+inter_PATH = PATH[0 : last_index + 1] + "inter_" + PATH[last_index + 1 :]
 new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
-
 # Main function that is called to determine the bar that should be set
 def square_call(square_bar=1800):
     num_square_ft = square_limit(square_bar)
@@ -83,7 +83,7 @@ square_bar = square_call(square_bar=1800)
 def add_list(address, row_val):
     # Bar to determine which clients should access the housing square footage data
     global square_bar
-
+    global pin_list
     # Opens new reader object for each thread
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -106,6 +106,7 @@ def add_list(address, row_val):
             ).json()["items"][0]["PRESENTUSE"]
             if present_use == "":
                 present_use = "Not Avaliable"
+            pin_list.insert(row_val - 1, present_use)
             # Creates url based off of pin_id(Parcel Number)
             # Url is not verified to avoid web visit restriction
             url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
@@ -149,57 +150,76 @@ def add_list(address, row_val):
             else:
                 line.append(error_message)
                 return line
-        # Takes square_ft data from clients
-        square_ft = int(line[8])
-        if square_ft <= square_bar:
-            if "condo" not in present_use.lower():
-                try:
-                    # Takes request for square footage
-                    source = requests.get(
-                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
-                    ).text
-                    # Takes text element using Beautfiul Soup
-                    soup = BeautifulSoup(source, "lxml")
-                    # Parses through html to find correct source
-                    table1 = soup.find("table", id="container")
-                    table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
-                    tr = table2.find_all("tr")[1]
-                    # Old iteration if not looping
-                    # header = tr.find_all("td")[0].text.lower()
-                    # if header == "total square footage":
-                    #     new_square_ft = tr.find_all("td")[1].text
-                    # else:
-                    #     new_square_ft = "Error"
-                    # Loops through tr tags in table
-                    for value in tr:
-                        try:
-                            header = tr.find_all("td")[0].text.lower()
-                            # Sees if header is correct then will append
-                            if header == "total square footage":
-                                new_square_ft = tr.find_all("td")[1].text
-                                break
-                        except:
-                            new_square_ft = "-Error-"
-                except:
-                    # Inputs error message if previous proccesses failed
-                    new_square_ft = "-Error-"
-                # Appends square footage
-                line.append(str(new_square_ft))
-            else:
-                # Appends dashes to maintain csv structure
-                line.append("---")
-        else:
-            # Appends dashes to maintain csv structure
-            line.append("---")
         # Appends previous information scraped
         line.append(present_use)
         line.append(url)
         return line
 
 
+def square_footage(pin_id, row_val):
+    with open(PATH, "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        # Iterates to the correct row to read from
+        for _ in range(row_val):
+            next(csv_reader)
+        # Takes line that is going to be read from
+        line = next(csv_reader)
+        # Takes square_ft data from clients
+        if "condo" not in str(line[11]):
+            square_ft = int(line[8])
+            if square_ft <= square_bar:
+                try:
+                    # Takes request for square footage
+                    source = requests.get(
+                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+                    ).text
+                    # Takes text element using Beautfiul Soup
+                    soup = BeautifulSoup(source, "lxml")
+                    # Parses through html to find correct source
+                    table1 = soup.find("table", id="TABLE1")
+                    table2 = table1.find_all("table", class_="GridViewStyle")[13]
+                    tr = table2.find_all("tr")
+                    print(tr)
+                    # Loops through tr in html to see which match the correct html tag to scrape
+                    for value in tr:
+                        # Compares header tags to scrape correct one
+                        tester = value.find_all("td")[0].text.lower()
+                        print(tester)
+                        if tester == "total finished area":
+                            new_square_ft = value.find_all("td")[1].text
+                except:
+                    # Inputs error message if previous proccesses failed
+                    new_square_ft = "-Error-"
+                # Appends square footage
+                line.insert(11, str(new_square_ft))
+            else:
+                # Appends dashes to maintain csv structure
+                line.insert(11, "---")
+        else:
+            return line.insert(11, "---")
+
+
 # Creates list to ensure each csv row is read for the correct row being written
 num_list = list(range(1, len(address_list) + 1))
+# Creates list to store pin_id information
+pin_list = []
 # Reads csv file to copy top line of csv_file
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    first_line = next(csv_reader)
+    with open(inter_PATH, "w") as new_file:
+        csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
+        # Adds additional elements to top row of csv data
+        first_line.append("Real Square Footage")
+        first_line.append("Present Use")
+        first_line.append("URL")
+        csv_writer.writerow(first_line)
+        # Opens threading module
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Maps function ensure the threads called first are executed first
+            for line in executor.map(add_list, address_list, num_list):
+                csv_writer.writerow(line)
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
@@ -213,6 +233,16 @@ with open(PATH, "r") as csv_file:
         # Opens threading module
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
-            for line in executor.map(add_list, address_list, num_list):
+            for line in executor.map(square_footage, pin_list, num_list):
                 csv_writer.writerow(line)
+
+
+if path.isfile(inter_PATH):
+    try:
+        remove(inter_PATH)
+    except OSError as e:
+        print("Error: %s - %s." % (e.filename, e.strerror))
+else:
+    print("Error removing intermeadiate files")
+
 print("Finished!")
