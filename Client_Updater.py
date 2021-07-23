@@ -117,15 +117,15 @@ def add_list(address, row_val):
                 return line
         if passthrough:
             if square_ft <= square_bar:
-
                 try:
                     source = requests.get(
                         f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
                     ).text
                     soup = BeautifulSoup(source, "lxml")
+                    # Is it in TABLE1
                     table1 = soup.find("table", id="TABLE1")
                     table2 = table1.find_all("table", class_="GridViewStyle")[13]
-                    tr = table2.find_all("tr", class_="GridViewAlternatingRowStyle")
+                    tr = table2.find_all("tr")
                     for value in tr:
                         tester = value.find_all("td")[0].text.lower()
                         print(tester)
