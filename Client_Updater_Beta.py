@@ -200,7 +200,7 @@ def square_footage(pin_id, row_val):
 
 
 # Creates list to ensure each csv row is read for the correct row being written
-num_list = list(range(1, len(address_list) + 1))
+num_list = tuple(range(1, len(address_list) + 1))
 # Creates list to store pin_id information
 pin_list = []
 # Reads csv file to copy top line of csv_file

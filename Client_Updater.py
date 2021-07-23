@@ -164,22 +164,23 @@ def add_list(address, row_val):
                     table1 = soup.find("table", id="container")
                     table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
                     tr = table2.find_all("tr")[1]
-                    # Old iteration if not looping
-                    # header = tr.find_all("td")[0].text.lower()
-                    # if header == "total square footage":
-                    #     new_square_ft = tr.find_all("td")[1].text
-                    # else:
-                    #     new_square_ft = "Error"
-                    # Loops through tr tags in table
-                    for value in tr:
-                        try:
-                            header = tr.find_all("td")[0].text.lower()
-                            # Sees if header is correct then will append
-                            if header == "total square footage":
-                                new_square_ft = tr.find_all("td")[1].text
-                                break
-                        except:
-                            new_square_ft = "-Error-"
+                    try:
+                        header = tr.find_all("td")[0].text.lower()
+                        if header == "total square footage":
+                            new_square_ft = tr.find_all("td")[1].text
+                        else:
+                            new_square_ft = "Error"
+                    except:
+                        # Loops through tr tags in table
+                        for value in tr:
+                            try:
+                                header = tr.find_all("td")[0].text.lower()
+                                # Sees if header is correct then will append
+                                if header == "total square footage":
+                                    new_square_ft = tr.find_all("td")[1].text
+                                    break
+                            except:
+                                new_square_ft = "-Error-"
                 except:
                     # Inputs error message if previous proccesses failed
                     new_square_ft = "-Error-"
@@ -197,8 +198,8 @@ def add_list(address, row_val):
         return line
 
 
-# Creates list to ensure each csv row is read for the correct row being written
-num_list = list(range(1, len(address_list) + 1))
+# Creates tuple to ensure each csv row is read for the correct row being written
+num_list = tuple(range(1, len(address_list) + 1))
 # Reads csv file to copy top line of csv_file
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
