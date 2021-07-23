@@ -98,6 +98,8 @@ def add_list(address, row_val):
             present_use = requests.get(
                 f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
             ).json()["items"][0]["PRESENTUSE"]
+            if present_use == "":
+                present_use = "Not Avaliable"
             # Creates url based off of pin_id(Parcel Number)
             # Url is not verified to avoid web visit restriction
             url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
