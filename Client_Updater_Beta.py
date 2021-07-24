@@ -145,22 +145,18 @@ def add_list(row_val):
                     ).json()["items"][0]["PRESENTUSE"]
                     url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
                 except:
-                    pin_id = ""
-                    present_use = ""
-                    url = ""
-                    passthrough = False
+                    add_info = (False,)
+                    return add_info
             else:
-                pin_id = ""
-                present_use = ""
-                url = ""
-                passthrough = False
+                add_info = (False,)
+                return add_info
         # Appends previous information scraped
-        add_info = (pin_id, present_use, url, passthrough)
+        add_info = (passthrough, present_use, url, pin_id)
         return add_info
 
 
 def square_footage(all_info, row_val):
-    if passthrough = True:
+    if all_info[0] = True:
         with open(PATH, "r") as csv_file:
             csv_reader = csv.reader(csv_file)
             # Iterates to the correct row to read from
@@ -168,8 +164,6 @@ def square_footage(all_info, row_val):
                 next(csv_reader)
             # Takes line that is going to be read from
             line = next(csv_reader)
-
-            square_ft = int(line[8])
             # Takes square_ft data from clients
             if (
                 "condo" not in all_info[2].lower()
@@ -181,7 +175,7 @@ def square_footage(all_info, row_val):
                     try:
                         # Takes request for square footage
                         source = requests.get(
-                            f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
+                            f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={all_info[3]}"
                         ).text
                         # Takes text element using Beautfiul Soup
                         soup = BeautifulSoup(source, "lxml")
@@ -215,13 +209,13 @@ def square_footage(all_info, row_val):
                     return line.extend("---", all_info[1], all_info[2])
             else:
                 return line.extend("---", all_info[1], all_info[2])
-                                     
+            return line.extend(new_square_ft, all_info[1], all_info[2])                         
                                      
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     row_count = sum(1 for row in csv_reader)
 # Creates list to ensure each csv row is read for the correct row being written
-num_list = tuple(range(1, row_count + 1))
+num_list = tuple(range(1, row_count))
 # Creates list to store pin_id information
 all_info = []
 
@@ -238,9 +232,7 @@ with open(PATH, "r") as csv_file:
     with open(new_PATH, "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         # Adds additional elements to top row of csv data
-        first_line.append("Real Square Footage")
-        first_line.append("Present Use")
-        first_line.append("URL")
+        first_line.extend("Real Square Footage", "Present Use", "URL")
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
