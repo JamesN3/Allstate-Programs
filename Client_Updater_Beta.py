@@ -156,7 +156,8 @@ def add_list(row_val):
 
 
 def square_footage(all_info, row_val):
-    if all_info[0] = True:
+    if all_info[0] == True:
+        global square_bar
         with open(PATH, "r") as csv_file:
             csv_reader = csv.reader(csv_file)
             # Iterates to the correct row to read from
@@ -181,7 +182,9 @@ def square_footage(all_info, row_val):
                         soup = BeautifulSoup(source, "lxml")
                         # Parses through html to find correct source
                         table1 = soup.find("table", id="container")
-                        table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
+                        table2 = table1.find(
+                            "table", id="cphContent_DetailsViewPropTypeR"
+                        )
                         tr = table2.find_all("tr")[1]
                         try:
                             header = tr.find_all("td")[0].text.lower()
@@ -209,8 +212,9 @@ def square_footage(all_info, row_val):
                     return line.extend("---", all_info[1], all_info[2])
             else:
                 return line.extend("---", all_info[1], all_info[2])
-            return line.extend(new_square_ft, all_info[1], all_info[2])                         
-                                     
+            return line.extend(new_square_ft, all_info[1], all_info[2])
+
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     row_count = sum(1 for row in csv_reader)
