@@ -216,6 +216,7 @@ def square_footage(all_info, row_val):
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     row_count = sum(1 for row in csv_reader)
+
 # Creates list to ensure each csv row is read for the correct row being written
 num_list = tuple(range(1, row_count))
 # Creates list to store pin_id information

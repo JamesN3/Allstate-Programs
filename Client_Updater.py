@@ -38,7 +38,7 @@ address_list = df["Address"].tolist()
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
 new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
-print(len(address_list))
+
 # Main function that is called to determine the bar that should be set
 def square_call(square_bar=1800):
     num_square_ft = square_limit(square_bar)
