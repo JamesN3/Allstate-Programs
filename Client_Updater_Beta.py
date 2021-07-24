@@ -209,21 +209,12 @@ def square_footage(all_info, row_val):
                     except:
                         new_square_ft = "-Error-"
                     # Appends square footage
-                    line.append(new_square_ft)
-                    line.append(all_info[1])
-                    line.append(all_info[2])
-                    return line
+                    return append_func(line, new_square_ft, all_info[1], all_info[2])
                 else:
                     # Appends dashes to maintain csv structure
-                    line.append("---")
-                    line.append(all_info[1])
-                    line.append(all_info[2)
-                    return line
+                    return append_func(line, "---", all_info[1], all_info[2])
             else:
-                line.append("---")
-                line.append(all_info[1])
-                line.append(all_info[2)
-                return line
+                return append_func(line, "---", all_info[1], all_info[2])
 
 def append_func(line, new_square_ft, present_use, url):
     line.append(new_square_ft)
