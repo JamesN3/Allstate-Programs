@@ -67,7 +67,8 @@ def square_limit(square_bar, info):
             info_index += 1
     return num_square_ft
 
-
+# Convert to lamba
+# lamba input: true_return if x <99 else false_return
 # Returns if the boolean if clients fit within limit
 def square_bar_test(square_bar):
     if square_limit(square_bar) < 999:
@@ -125,6 +126,8 @@ def add_list(row_val):
                 "shoreclub": "shore club",
             }
             # Means process has failed thus far unless dictionary change finds search result
+            # List comprehension?
+            # 
             passthrough = False
             # Loops through dictionary to see if dictionary result is in address
             for abbreviation, full in abb_dict.items():
