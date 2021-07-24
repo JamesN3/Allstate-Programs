@@ -226,7 +226,9 @@ all_info = []
 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
     # Maps function ensure the threads called first are executed first
     for line in executor.map(add_list, num_list):
-        all_info.append(line)
+        all_info.append(line)    
+    #all_info = [line for line in executor.map(add_list,num_list)]
+    
 tuple(all_info)
 # Reads csv file to copy top line of csv_file
 
