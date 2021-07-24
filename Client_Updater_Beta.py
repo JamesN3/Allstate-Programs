@@ -7,8 +7,7 @@
 import requests
 import csv
 import concurrent.futures
-import pandas as pd
-from os import path, remove
+from os import path
 from bs4 import BeautifulSoup
 
 # Message is to inform user about program operations
@@ -32,14 +31,12 @@ while not path.exists(PATH):
 
 # Reminder to ensure program does not stop in executiomn
 print("Reminder: Do not open the csv file that is being read or written!")
-# Pandas dataframa reads address_list to pass to threads
-df = pd.read_csv(PATH)
-address_list = df["Address"].tolist()
+
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
 new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 # Main function that is called to determine the bar that should be set
-def square_call(square_bar=1800):
+def square_call(square_bar=1850):
     num_square_ft = square_limit(square_bar)
     if num_square_ft < 999:
         stopper = square_bar_test(square_bar + 10)
@@ -60,8 +57,13 @@ def square_limit(square_bar):
         next(csv_reader)
         num_square_ft = 0
         for line in csv_reader:
-            if int(line[8]) <= square_bar:
-                num_square_ft += 1
+            if (
+                "condo" not in all_info[2].lower()
+                or "apartment" not in all_info[2].lower()
+                or "mobile home" not in all_info[2].lower()
+            ):
+                if int(line[8]) <= square_bar:
+                    num_square_ft += 1
     return num_square_ft
 
 
@@ -76,13 +78,10 @@ def square_bar_test(square_bar):
 # The message that is sent when an error occurs
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
 # Calls function to get bar to set to
-square_bar = square_call(square_bar=1800)
+square_bar = square_call(square_bar=1850)
 
 # Function that threads use
-def add_list(address, row_val):
-    # Bar to determine which clients should access the housing square footage data
-    global square_bar
-    global pin_list
+def add_list(row_val):
     # Opens new reader object for each thread
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -93,6 +92,7 @@ def add_list(address, row_val):
         line = next(csv_reader)
         # Take address and converts to search friendly form
         # Converts spaces " " to "%20"
+        address = str(line[2])
         address = address.replace(" ", "%20")
         try:
             # Takes pin_id or parcel number required to access web data and urls
@@ -143,18 +143,19 @@ def add_list(address, row_val):
                     ).json()["items"][0]["PRESENTUSE"]
                     url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
                 except:
-                    line.append(error_message)
-                    return line
+                    present_use = -1
+                    url = -1
+                    pin_id = -1
             else:
-                line.append(error_message)
-                return line
+                present_use = -1
+                url = -1
+                pin_id = -1
         # Appends previous information scraped
-        line.append(present_use)
-        line.append(url)
-        return line
+        add_info = (pin_id, present_use, url)
+        return add_info
 
 
-def square_footage(pin_id, row_val):
+def square_footage(all_info, row_val):
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         # Iterates to the correct row to read from
@@ -162,8 +163,14 @@ def square_footage(pin_id, row_val):
             next(csv_reader)
         # Takes line that is going to be read from
         line = next(csv_reader)
+
+        square_ft = int(line[8])
         # Takes square_ft data from clients
-        if "condo" not in str(line[11]):
+        if (
+            "condo" not in all_info[2].lower()
+            or "apartment" not in all_info[2].lower()
+            or "mobile home" not in all_info[2].lower()
+        ):
             square_ft = int(line[8])
             if square_ft <= square_bar:
                 try:
@@ -205,10 +212,20 @@ def square_footage(pin_id, row_val):
             return line.insert(11, "---")
 
 
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    row_count = sum(1 for row in csv_reader)
 # Creates list to ensure each csv row is read for the correct row being written
-num_list = tuple(range(1, len(address_list) + 1))
+num_list = tuple(range(1, row_count + 1))
 # Creates list to store pin_id information
 all_info = []
+
+# Opens threading module
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    # Maps function ensure the threads called first are executed first
+    for line in executor.map(add_list, num_list):
+        all_info.append(line)
+tuple(all_info)
 # Reads csv file to copy top line of csv_file
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
@@ -220,10 +237,8 @@ with open(PATH, "r") as csv_file:
         first_line.append("Present Use")
         first_line.append("URL")
         csv_writer.writerow(first_line)
-        # Opens threading module
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
-            for line in executor.map(add_list, address_list, num_list):
-                all_info.append(line)
-            tuple(all_info)
+            for line in executor.map(square_footage, all_info, num_list):
+                csv_writer.writerow(line)
 print("Finished!")
