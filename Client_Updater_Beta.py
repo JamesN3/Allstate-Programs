@@ -51,6 +51,7 @@ def square_call(square_bar=1850):
 
 
 # Counts the number of clients that fit within square_bar to determine bar to set to
+# Implement multiprocessing to speed function call
 def square_limit(square_bar):
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -109,6 +110,7 @@ def add_list(row_val):
             # Url is not verified to avoid web visit restriction
             url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
             # Signifies that process was successful to move onto access square footage data
+            passthrough = True
         except:
             address = address.lower()
             # Dictionary that is circled through to see if search result can be recovered
@@ -143,75 +145,93 @@ def add_list(row_val):
                     ).json()["items"][0]["PRESENTUSE"]
                     url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
                 except:
-                    present_use = -1
-                    url = -1
-                    pin_id = -1
+                    pin_id = ""
+                    present_use = ""
+                    url = ""
+                    passthrough = False
             else:
-                present_use = -1
-                url = -1
-                pin_id = -1
+                pin_id = ""
+                present_use = ""
+                url = ""
+                passthrough = False
         # Appends previous information scraped
-        add_info = (pin_id, present_use, url)
+        add_info = (pin_id, present_use, url, passthrough)
         return add_info
 
 
 def square_footage(all_info, row_val):
-    with open(PATH, "r") as csv_file:
-        csv_reader = csv.reader(csv_file)
-        # Iterates to the correct row to read from
-        for _ in range(row_val):
-            next(csv_reader)
-        # Takes line that is going to be read from
-        line = next(csv_reader)
+    if passthrough = True:
+        with open(PATH, "r") as csv_file:
+            csv_reader = csv.reader(csv_file)
+            # Iterates to the correct row to read from
+            for _ in range(row_val):
+                next(csv_reader)
+            # Takes line that is going to be read from
+            line = next(csv_reader)
 
-        square_ft = int(line[8])
-        # Takes square_ft data from clients
-        if (
-            "condo" not in all_info[2].lower()
-            or "apartment" not in all_info[2].lower()
-            or "mobile home" not in all_info[2].lower()
-        ):
             square_ft = int(line[8])
-            if square_ft <= square_bar:
-                try:
-                    # Takes request for square footage
-                    source = requests.get(
-                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
-                    ).text
-                    # Takes text element using Beautfiul Soup
-                    soup = BeautifulSoup(source, "lxml")
-                    # Parses through html to find correct source
-                    table1 = soup.find("table", id="container")
-                    table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
-                    tr = table2.find_all("tr")[1]
+            # Takes square_ft data from clients
+            if (
+                "condo" not in all_info[2].lower()
+                or "apartment" not in all_info[2].lower()
+                or "mobile home" not in all_info[2].lower()
+            ):
+                square_ft = int(line[8])
+                if square_ft <= square_bar:
                     try:
-                        header = tr.find_all("td")[0].text.lower()
-                        if header == "total square footage":
-                            new_square_ft = tr.find_all("td")[1].text
-                        else:
-                            new_square_ft = "Error"
+                        # Takes request for square footage
+                        source = requests.get(
+                            f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
+                        ).text
+                        # Takes text element using Beautfiul Soup
+                        soup = BeautifulSoup(source, "lxml")
+                        # Parses through html to find correct source
+                        table1 = soup.find("table", id="container")
+                        table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
+                        tr = table2.find_all("tr")[1]
+                        try:
+                            header = tr.find_all("td")[0].text.lower()
+                            if header == "total square footage":
+                                new_square_ft = tr.find_all("td")[1].text
+                            else:
+                                new_square_ft = "Error"
+                        except:
+                            # Loops through tr tags in table
+                            for value in tr:
+                                try:
+                                    header = tr.find_all("td")[0].text.lower()
+                                    # Sees if header is correct then will append
+                                    if header == "total square footage":
+                                        new_square_ft = tr.find_all("td")[1].text
+                                        break
+                                except:
+                                    new_square_ft = "-Error-"
                     except:
-                        # Loops through tr tags in table
-                        for value in tr:
-                            try:
-                                header = tr.find_all("td")[0].text.lower()
-                                # Sees if header is correct then will append
-                                if header == "total square footage":
-                                    new_square_ft = tr.find_all("td")[1].text
-                                    break
-                            except:
-                                new_square_ft = "-Error-"
-                except:
-                    new_square_ft = "-Error-"
-                # Appends square footage
-                line.insert(11, str(new_square_ft))
+                        new_square_ft = "-Error-"
+                    # Appends square footage
+                    line.append(new_square_ft)
+                    line.append(all_info[1])
+                    line.append(all_info[2])
+                    return line
+                else:
+                    # Appends dashes to maintain csv structure
+                    line.append("---")
+                    line.append(all_info[1])
+                    line.append(all_info[2)
+                    return line
             else:
-                # Appends dashes to maintain csv structure
-                line.insert(11, "---")
-        else:
-            return line.insert(11, "---")
+                line.append("---")
+                line.append(all_info[1])
+                line.append(all_info[2)
+                return line
 
-
+def append_func(line, new_square_ft, present_use, url):
+    line.append(new_square_ft)
+    line.append(present_use)
+    line.append(url)
+    return line
+                                     
+                                     
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     row_count = sum(1 for row in csv_reader)
