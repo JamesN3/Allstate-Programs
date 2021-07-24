@@ -29,14 +29,11 @@ while not path.exists(PATH):
         input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
     )
 
-# Reminder to ensure program does not stop in executiomn
-print("Reminder: Do not open the csv file that is being read or written!")
-
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
 new_PATH = PATH[0 : last_index + 1] + "new_" + PATH[last_index + 1 :]
 # Main function that is called to determine the bar that should be set
-def square_call(square_bar=1850):
+def square_call(square_bar=1850, all_info=[]):
     num_square_ft = square_limit(square_bar)
     if num_square_ft < 999:
         stopper = square_bar_test(square_bar + 10)
@@ -52,19 +49,22 @@ def square_call(square_bar=1850):
 
 # Counts the number of clients that fit within square_bar to determine bar to set to
 # Implement multiprocessing to speed function call
-def square_limit(square_bar):
+def square_limit(square_bar, info):
     with open(PATH, "r") as csv_file:
         csv_reader = csv.reader(csv_file)
         next(csv_reader)
         num_square_ft = 0
+        info_index = 0
+        present_use = info[info_index][1].lower()
         for line in csv_reader:
             if (
-                "condo" not in all_info[2].lower()
-                or "apartment" not in all_info[2].lower()
-                or "mobile home" not in all_info[2].lower()
+                "condo" not in present_use
+                or "apartment" not in present_use
+                or "mobile home" not in present_use
             ):
                 if int(line[8]) <= square_bar:
                     num_square_ft += 1
+            info_index += 1
     return num_square_ft
 
 
@@ -78,8 +78,6 @@ def square_bar_test(square_bar):
 
 # The message that is sent when an error occurs
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-# Calls function to get bar to set to
-square_bar = square_call(square_bar=1850)
 
 # Function that threads use
 def add_list(row_val):
@@ -224,12 +222,19 @@ num_list = tuple(range(1, row_count))
 all_info = []
 
 # Opens threading module
-with concurrent.futures.ThreadPoolExecutor() as executor:
+with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
     # Maps function ensure the threads called first are executed first
     for line in executor.map(add_list, num_list):
         all_info.append(line)
 tuple(all_info)
 # Reads csv file to copy top line of csv_file
+
+# Calls function to get bar to set to
+square_bar = square_call(square_bar=1850, all_info=all_info)
+
+# Reminder to ensure program does not stop in executiomn
+print("Reminder: Do not open the csv file that is being read or written!")
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
