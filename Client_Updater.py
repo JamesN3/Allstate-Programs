@@ -154,8 +154,8 @@ def add_list(address, row_val):
         if square_ft <= square_bar:
             if (
                 "condo" not in present_use.lower()
-                or "apartment" not in present_use.lower()
-                or "mobile home" not in present_use.lower()
+                and "apartment" not in present_use.lower()
+                and "mobile home" not in present_use.lower()
             ):
                 try:
                     # Takes request for square footage

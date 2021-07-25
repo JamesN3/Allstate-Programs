@@ -156,7 +156,7 @@ def add_list(row_val):
         return add_info
 
 
-def square_footage(all_info, row_val):
+def square_footage(all_info, row_val, csv_reader):
     if all_info[0] == True:
         global square_bar
         global error_message
@@ -194,7 +194,7 @@ def square_footage(all_info, row_val):
                             if header == "total square footage":
                                 new_square_ft = tr.find_all("td")[1].text
                             else:
-                                new_square_ft = "-Error-"
+                                new_square_ft = "Error"
                         except:
                             # Loops through tr tags in table
                             for value in tr:
@@ -208,18 +208,14 @@ def square_footage(all_info, row_val):
                                     new_square_ft = "-Error-"
                     except:
                         new_square_ft = "-Error-"
+                    # Appends square footage
+                    return line.extend(("---", all_info[1], all_info[2]))
                 else:
                     # Appends dashes to maintain csv structure
-                    line.extend(("---", all_info[1], all_info[2]))
-                    return line
+                    return line.extend(("---", all_info[1], all_info[2]))
             else:
-                line.extend(("---", all_info[1], all_info[2]))
-                return line
-            line.extend((new_square_ft, all_info[1], all_info[2]))
-            return line
-    else:
-        line.append(error_message)
-        return line
+                return line.append(error_message)
+            return line.extend((new_square_ft, all_info[1], all_info[2]))
 
 
 with open(PATH, "r") as csv_file:
@@ -252,6 +248,6 @@ with open(PATH, "r") as csv_file:
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
-            for line in executor.map(square_footage, all_info, num_list):
+            for line in executor.map(square_footage, all_info, num_list, csv_reader):
                 csv_writer.writerow(line)
 print("Finished!")
