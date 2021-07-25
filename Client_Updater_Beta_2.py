@@ -156,17 +156,17 @@ def add_list(row_val):
         return add_info
 
 
-def square_footage(all_info, row_val, csv_reader):
-    if all_info[0] == True:
-        global square_bar
-        global error_message
-        with open(PATH, "r") as csv_file:
-            csv_reader = csv.reader(csv_file)
-            # Iterates to the correct row to read from
-            for _ in range(row_val):
-                next(csv_reader)
-            # Takes line that is going to be read from
-            line = next(csv_reader)
+def square_footage(all_info, row_val):
+    global square_bar
+    global error_message
+    with open(PATH, "r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        # Iterates to the correct row to read from
+        for _ in range(row_val):
+            next(csv_reader)
+        # Takes line that is going to be read from
+        line = next(csv_reader)
+        if all_info[0] == True:
             # Takes square_ft data from clients
             present_use = all_info[1].lower()
             if (
@@ -194,7 +194,7 @@ def square_footage(all_info, row_val, csv_reader):
                             if header == "total square footage":
                                 new_square_ft = tr.find_all("td")[1].text
                             else:
-                                new_square_ft = "Error"
+                                new_square_ft = "-Error-"
                         except:
                             # Loops through tr tags in table
                             for value in tr:
@@ -208,14 +208,18 @@ def square_footage(all_info, row_val, csv_reader):
                                     new_square_ft = "-Error-"
                     except:
                         new_square_ft = "-Error-"
-                    # Appends square footage
-                    return line.extend(("---", all_info[1], all_info[2]))
                 else:
                     # Appends dashes to maintain csv structure
-                    return line.extend(("---", all_info[1], all_info[2]))
+                    line.extend(("---", all_info[1], all_info[2]))
+                    return line
             else:
-                return line.append(error_message)
-            return line.extend((new_square_ft, all_info[1], all_info[2]))
+                line.extend(("---", all_info[1], all_info[2]))
+                return line
+            line.extend((new_square_ft, all_info[1], all_info[2]))
+            return line
+        else:
+            line.append(error_message)
+            return line
 
 
 with open(PATH, "r") as csv_file:
@@ -248,6 +252,6 @@ with open(PATH, "r") as csv_file:
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
-            for line in executor.map(square_footage, all_info, num_list, csv_reader):
+            for line in executor.map(square_footage, all_info, num_list):
                 csv_writer.writerow(line)
 print("Finished!")
