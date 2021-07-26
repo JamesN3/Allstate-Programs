@@ -82,11 +82,9 @@ error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealpr
 
 # Function that threads use
 def add_list(csv_reader):
-    # Takes line that is going to be read from
-    line = next(csv_reader)
     # Take address and converts to search friendly form
     # Converts spaces " " to "%20"
-    address = str(line[2])
+    address = str(csv_reader[2])
     address = address.replace(" ", "%20")
     try:
         # Takes pin_id or parcel number required to access web data and urls
@@ -150,10 +148,9 @@ def add_list(csv_reader):
     return add_info
 
 
-def square_footage(all_info, row_val, csv_reader):
+def square_footage(all_info, csv_reader):
     global square_bar
     global error_message
-    line = next(csv_reader)
     if all_info[0] == True:
         # Takes square_ft data from clients
         present_use = all_info[1].lower()
@@ -162,7 +159,7 @@ def square_footage(all_info, row_val, csv_reader):
             and "apartment" not in present_use
             and "mobile home" not in present_use
         ):
-            square_ft = int(line[8])
+            square_ft = int(csv_reader[8])
             if square_ft <= square_bar:
                 try:
                     # Takes request for square footage
@@ -196,22 +193,22 @@ def square_footage(all_info, row_val, csv_reader):
                     new_square_ft = "-Error-"
             else:
                 # Appends dashes to maintain csv structure
-                line.extend(("---", all_info[1], all_info[2]))
-                return line
+                csv_reader.extend(("---", all_info[1], all_info[2]))
+                return csv_reader
         else:
-            line.extend(("---", all_info[1], all_info[2]))
-            return line
-        line.extend((new_square_ft, all_info[1], all_info[2]))
-        return line
+            csv_reader.extend(("---", all_info[1], all_info[2]))
+            return csv_reader
+        csv_reader.extend((new_square_ft, all_info[1], all_info[2]))
+        return csv_reader
     else:
-        line.append(error_message)
-        return line
+        csv_reader.append(error_message)
+        return csv_reader
 
 
 # Mabye don't use csv_reader passed through
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
-    first_line = next(csv_reader)
+    next(csv_reader)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Maps function ensure the threads called first are executed first
         all_info = [line for line in executor.map(add_list, csv_reader)]
