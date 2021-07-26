@@ -9,7 +9,9 @@ import csv
 import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
+import tkinter as tk
 
+root = tk.TK()
 # Message is to inform user about program operations
 print(
     "\nOutput file will be in same folder as input file\nNew file name will be "
