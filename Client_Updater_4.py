@@ -81,10 +81,14 @@ def add_list(line):
             f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
         ).json()["items"][0]["PIN"]
         # Takes present_use data Ex:"Single Family(Res)" to put in csv file
-        present_use = requests.get(
+        source = requests.get(
             f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-        ).json()["items"][0]["PRESENTUSE"]
+        ).json()
+        taxpayer_name = source["items"][0]["TAXPAYERNAME"]
+        present_use = source["items"][0]["PRESENTUSE"]
         if present_use == "":
+            present_use = "Not Avaliable"
+        if taxpayer_name == "":
             present_use = "Not Avaliable"
         # Creates url based off of pin_id(Parcel Number)
         # Url is not verified to avoid web visit restriction
@@ -120,9 +124,11 @@ def add_list(line):
                 pin_id = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
                 ).json()["items"][0]["PIN"]
-                present_use = requests.get(
+                source = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-                ).json()["items"][0]["PRESENTUSE"]
+                ).json()
+                taxpayer_name = source["items"][0]["TAXPAYERNAME"]
+                present_use = source["items"][0]["PRESENTUSE"]
                 url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
             except:
                 add_info = (False,)
@@ -131,7 +137,7 @@ def add_list(line):
             add_info = (False,)
             return add_info
     # Appends previous information scraped
-    add_info = (passthrough, present_use, url, pin_id)
+    add_info = (passthrough, taxpayer_name, present_use, url, pin_id)
     return add_info
 
 
@@ -140,18 +146,22 @@ def square_footage(all_info, line):
     global error_message
     if all_info[0] == True:
         # Takes square_ft data from clients
-        present_use = all_info[1].lower()
+        taxpayer_name = all_info[1]
+        present_use = all_info[2]
+        url = all_info[3]
+        pin_id = all_info[4]
+        present_use_lower = all_info[2].lower()
         if (
-            "condo" not in present_use
-            and "apartment" not in present_use
-            and "mobile home" not in present_use
+            "condo" not in present_use_lower
+            and "apartment" not in present_use_lower
+            and "mobile home" not in present_use_lower
         ):
             square_ft = int(line[8])
             if square_ft <= square_bar:
                 try:
                     # Takes request for square footage
                     source = requests.get(
-                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={all_info[3]}"
+                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
                     ).text
                     # Takes text element using Beautfiul Soup
                     soup = BeautifulSoup(source, "lxml")
@@ -184,10 +194,10 @@ def square_footage(all_info, line):
         else:
             # Appends dashes to maintain csv structure
             new_square_ft = "---"
-        line.extend((new_square_ft, all_info[1], all_info[2]))
+        line.extend((taxpayer_name, new_square_ft, present_use, url))
         return line
     else:
-        line.append(error_message)
+        line.extend(("---", "---", "---", error_message))
         return line
 
 
@@ -211,7 +221,9 @@ with open(PATH, "r") as csv_file:
     with open(new_PATH, "w") as new_file:
         csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
         # Adds additional elements to top row of csv data
-        first_line.extend(("Real Square Footage", "Present Use", "URL"))
+        first_line.extend(
+            ("Taxpayer Name", "Real Square Footage", "Present Use", "URL")
+        )
         csv_writer.writerow(first_line)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
