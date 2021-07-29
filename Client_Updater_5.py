@@ -90,6 +90,7 @@ def add_list(line):
             regexPattern = "|".join(map(re.escape, delimiters))
             name_list = re.split(regexPattern, taxpayer_name)
             for name in name_list:
+                # Find different data structure to add to name
                 name = name.split(" ")
                 if line[1].lower() == name[0].lower():
                     taxpayer_fname = ""
