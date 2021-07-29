@@ -67,9 +67,6 @@ def square_limit(square_bar, info):
     return num_square_ft
 
 
-# The message that is sent when an error occurs
-error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-
 # Function that threads use
 def add_list(line):
     # Take address and converts to search friendly form
@@ -95,8 +92,14 @@ def add_list(line):
             for name in name_list:
                 name = name.split(" ")
                 if line[1].lower() == name[0].lower():
-                    taxpayer_name = ""
-
+                    taxpayer_fname = ""
+                    taxpayer_lname = ""
+                else:
+                    taxpayer_fname = name[0].title()
+                    taxpayer_lname = name[1].title()
+        else:
+            taxpayer_fname = ""
+            taxpayer_lname = ""
         # Creates url based off of pin_id(Parcel Number)
         # Url is not verified to avoid web visit restriction
         url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
@@ -128,15 +131,37 @@ def add_list(line):
         # If dictionary element changed, the program will submit another request for data to fix field
         if passthrough:
             try:
+                # Takes pin_id or parcel number required to access web data and urls
                 pin_id = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
                 ).json()["items"][0]["PIN"]
+                # Takes present_use data Ex:"Single Family(Res)" to put in csv file
                 source = requests.get(
                     f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
                 ).json()
                 taxpayer_name = source["items"][0]["TAXPAYERNAME"]
                 present_use = source["items"][0]["PRESENTUSE"]
+                # Parse more accurately
+                if str(line[1]).lower() not in taxpayer_name.lower():
+                    delimiters = "+", "&"
+                    regexPattern = "|".join(map(re.escape, delimiters))
+                    name_list = re.split(regexPattern, taxpayer_name)
+                    for name in name_list:
+                        name = name.split(" ")
+                        if line[1].lower() == name[0].lower():
+                            taxpayer_fname = ""
+                            taxpayer_lname = ""
+                        else:
+                            taxpayer_fname = name[0].title()
+                            taxpayer_lname = name[1].title()
+                else:
+                    taxpayer_fname = ""
+                    taxpayer_lname = ""
+                # Creates url based off of pin_id(Parcel Number)
+                # Url is not verified to avoid web visit restriction
                 url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+                # Signifies that process was successful to move onto access square footage data
+                passthrough = True
             except:
                 add_info = (False,)
                 return add_info
@@ -144,7 +169,7 @@ def add_list(line):
             add_info = (False,)
             return add_info
     # Appends previous information scraped
-    add_info = (passthrough, taxpayer_name, present_use, url, pin_id)
+    add_info = (passthrough, taxpayer_fname, taxpayer_lname, present_use, url, pin_id)
     return add_info
 
 
@@ -153,11 +178,12 @@ def square_footage(all_info, line):
     global error_message
     if all_info[0] == True:
         # Takes square_ft data from clients
-        taxpayer_name = all_info[1]
-        present_use = all_info[2]
-        url = all_info[3]
-        pin_id = all_info[4]
-        present_use_lower = all_info[2].lower()
+        taxpayer_fname = all_info[1]
+        taxpayer_lname = all_info[2]
+        present_use = all_info[3]
+        url = all_info[4]
+        pin_id = all_info[5]
+        present_use_lower = all_info[3].lower()
         if (
             "condo" not in present_use_lower
             and "apartment" not in present_use_lower
@@ -175,36 +201,60 @@ def square_footage(all_info, line):
                     # Parses through html to find correct source
                     table1 = soup.find("table", id="container")
                     table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
-                    tr = table2.find_all("tr")[1]
+                    tr = table2.find_all("tr")
+                    tr_sqft = table2.find_all("tr")[1]
+                    tr_yr = table2.find_all("tr")[0]
                     try:
-                        header = tr.find_all("td")[0].text.lower()
-                        if header == "total square footage":
-                            new_square_ft = tr.find_all("td")[1].text
+                        header_sqft = tr_sqft.find_all("td")[0].text.lower()
+                        if header_sqft == "total square footage":
+                            new_square_ft = tr_sqft.find_all("td")[1].text
                         else:
                             new_square_ft = "Error"
+                        header_yr = tr_sqft.find_all("td")[0].text.lower()
+                        if header_yr == "year built":
+                            new_year_built = tr_yr.find_all("td")[1].text
+                        else:
+                            new_year_built = "Error"
                     except:
                         # Loops through tr tags in table
                         for value in tr:
                             try:
-                                header = tr.find_all("td")[0].text.lower()
+                                header_sqft = tr.find_all("td")[0].text.lower()
                                 # Sees if header is correct then will append
-                                if header == "total square footage":
-                                    new_square_ft = tr.find_all("td")[1].text
+                                if header_sqft == "total square footage":
+                                    new_square_ft = value.find_all("td")[1].text
+                                    break
+                                header_yr = tr.find_all("td")[0].text.lower()
+                                if header_yr == "year built":
+                                    new_year_built = value.find_all("td")[1].text
                                     break
                             except:
                                 new_square_ft = "Error"
+                                new_year_built = "Error"
                 except:
                     new_square_ft = "Error"
+                    new_year_built = "Error"
             else:
                 # Appends dashes to maintain csv structure
                 new_square_ft = ""
+                new_year_built = ""
         else:
             # Appends dashes to maintain csv structure
             new_square_ft = ""
-        line.extend((taxpayer_fname, taxpayer_lname, new_square_ft, present_use, url))
+            new_year_built = ""
+        line.extend(
+            (
+                taxpayer_fname,
+                taxpayer_lname,
+                new_square_ft,
+                new_year_built,
+                present_use,
+                url,
+            )
+        )
         return line
     else:
-        line.extend(("", "", "", "", error_message))
+        line.extend(("", "", "", "", "", error_message))
         return line
 
 
@@ -222,6 +272,9 @@ square_bar = square_call(square_bar=1980, all_info=all_info)
 # Reminder to ensure program does not stop in execution
 print("Reminder: Do not open the csv file that is being read or written!")
 
+# The message that is sent when an error occurs
+error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
@@ -233,6 +286,7 @@ with open(PATH, "r") as csv_file:
                 "Mod-Taxpayer First Name",
                 "Mod-Taxpayer Last Name",
                 "Mod-Real Square Footage",
+                "Mod-Year Built",
                 "Mod-Present Use",
                 "Mod-URL",
             )
