@@ -282,8 +282,6 @@ with open(PATH, "r") as csv_file:
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Maps function ensure the threads called first are executed first
         all_info = [line for line in executor.map(add_list, csv_reader)]
-        # csv_reader is iterator so might not work
-        # all_info = map(add_list, csv_reader)
 tuple(all_info)
 
 # Calls function to get bar to set to
