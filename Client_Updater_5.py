@@ -9,7 +9,6 @@ import csv
 import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
-import re
 
 # Message is to inform user about program operations
 print(
@@ -79,30 +78,40 @@ def add_list(line):
             f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
         ).json()["items"][0]["PIN"]
         # Takes present_use data Ex:"Single Family(Res)" to put in csv file
-        source = requests.get(
-            f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-        ).json()
-        taxpayer_name = source["items"][0]["TAXPAYERNAME"]
-        present_use = source["items"][0]["PRESENTUSE"]
-        # Parse more accurately
-        if str(line[1]).lower() not in taxpayer_name.lower():
-            delimiters = "+", "&"
-            regexPattern = "|".join(map(re.escape, delimiters))
-            name_list = re.split(regexPattern, taxpayer_name)
-            for name in name_list:
-                name = name.split(" ")
-                if line[1].lower() == name[0].lower():
-                    taxpayer_fname = ""
-                    taxpayer_lname = ""
-                else:
-                    taxpayer_fname = name[0].title()
-                    taxpayer_lname = name[1].title()
-        else:
-            taxpayer_fname = ""
-            taxpayer_lname = ""
         # Creates url based off of pin_id(Parcel Number)
         # Url is not verified to avoid web visit restriction
         url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+        source = requests.get(
+            f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
+        ).json()
+
+        taxpayer_name = source["items"][0]["TAXPAYERNAME"]
+        present_use = source["items"][0]["PRESENTUSE"]
+        # Parse more accurately
+        if len(taxpayer_name) > 0:
+            if str(line[1]).lower() not in taxpayer_name.lower():
+                taxpayer_1 = taxpayer_name.replace("+", "|")
+                taxpayayer_2 = taxpayer_1.replace("&", "|")
+                name_list_1 = taxpayayer_2.split("|")
+                for name1 in name_list_1:
+                    name1 = name1.strip()
+                    name_list_2 = name1.split(" ")
+                    if (
+                        line[1].lower() == name_list_2[0].lower()
+                        and line[0].lower() == name_list_2[1].lower()
+                    ):
+                        taxpayer_lname = ""
+                        taxpayer_fname = ""
+                        break
+                    else:
+                        taxpayer_lname = name_list_2[0].title()
+                        taxpayer_fname = name_list_2[1].title()
+            else:
+                taxpayer_lname = ""
+                taxpayer_fname = ""
+        else:
+            taxpayer_lname = ""
+            taxpayer_fname = ""
         # Signifies that process was successful to move onto access square footage data
         passthrough = True
     except:
@@ -141,22 +150,26 @@ def add_list(line):
                 ).json()
                 taxpayer_name = source["items"][0]["TAXPAYERNAME"]
                 present_use = source["items"][0]["PRESENTUSE"]
-                # Parse more accurately
                 if str(line[1]).lower() not in taxpayer_name.lower():
-                    delimiters = "+", "&"
-                    regexPattern = "|".join(map(re.escape, delimiters))
-                    name_list = re.split(regexPattern, taxpayer_name)
-                    for name in name_list:
-                        name = name.split(" ")
-                        if line[1].lower() == name[0].lower():
-                            taxpayer_fname = ""
+                    taxpayer_1 = taxpayer_name.replace("+", "|")
+                    taxpayayer_2 = taxpayer_1.replace("&", "|")
+                    name_list_1 = taxpayayer_2.split("|")
+                    for name1 in name_list_1:
+                        name1 = name1.strip()
+                        name_list_2 = name1.split(" ")
+                        if (
+                            line[1].lower() == name_list_2[0].lower()
+                            and line[0].lower() == name_list_2[1].lower()
+                        ):
                             taxpayer_lname = ""
+                            taxpayer_fname = ""
+                            break
                         else:
-                            taxpayer_fname = name[0].title()
-                            taxpayer_lname = name[1].title()
+                            taxpayer_lname = name_list_2[0].title()
+                            taxpayer_fname = name_list_2[1].title()
                 else:
-                    taxpayer_fname = ""
                     taxpayer_lname = ""
+                    taxpayer_fname = ""
                 # Creates url based off of pin_id(Parcel Number)
                 # Url is not verified to avoid web visit restriction
                 url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
@@ -201,7 +214,6 @@ def square_footage(all_info, line):
                     # Parses through html to find correct source
                     table1 = soup.find("table", id="container")
                     table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
-                    tr = table2.find_all("tr")
                     tr_sqft = table2.find_all("tr")[1]
                     tr_yr = table2.find_all("tr")[0]
                     try:
@@ -210,27 +222,33 @@ def square_footage(all_info, line):
                             new_square_ft = tr_sqft.find_all("td")[1].text
                         else:
                             new_square_ft = "Error"
-                        header_yr = tr_sqft.find_all("td")[0].text.lower()
+                        header_yr = tr_yr.find_all("td")[0].text.lower()
                         if header_yr == "year built":
                             new_year_built = tr_yr.find_all("td")[1].text
                         else:
                             new_year_built = "Error"
                     except:
+                        new_square_ft = "Error"
+                        new_year_built = "Error"
                         # Loops through tr tags in table
+                        tr = table2.find_all("tr")
                         for value in tr:
                             try:
-                                header_sqft = tr.find_all("td")[0].text.lower()
+                                header_sqft = value.find_all("td")[0].text.lower()
                                 # Sees if header is correct then will append
                                 if header_sqft == "total square footage":
                                     new_square_ft = value.find_all("td")[1].text
                                     break
-                                header_yr = tr.find_all("td")[0].text.lower()
+                            except:
+                                pass
+                        for value in tr:
+                            try:
+                                header_yr = value.find_all("td")[0].text.lower()
                                 if header_yr == "year built":
                                     new_year_built = value.find_all("td")[1].text
                                     break
                             except:
-                                new_square_ft = "Error"
-                                new_year_built = "Error"
+                                pass
                 except:
                     new_square_ft = "Error"
                     new_year_built = "Error"
