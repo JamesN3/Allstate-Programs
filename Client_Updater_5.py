@@ -55,7 +55,7 @@ def square_limit(square_bar, info):
         info_index = 0
         for line, info in zip(csv_reader, all_info):
             if info[0] == True:
-                present_use = info[1].lower()
+                present_use = info[2].lower()
                 if (
                     "condo" not in present_use
                     and "apartment" not in present_use
@@ -96,22 +96,14 @@ def add_list(line):
                 for name1 in name_list_1:
                     name1 = name1.strip()
                     name_list_2 = name1.split(" ")
-                    if (
-                        line[1].lower() == name_list_2[0].lower()
-                        and line[0].lower() == name_list_2[1].lower()
-                    ):
-                        taxpayer_lname = ""
-                        taxpayer_fname = ""
+                    if line[1].lower() == name_list_2[0].lower():
+                        taxpayer_name = ""
                         break
-                    else:
-                        taxpayer_lname = name_list_2[0].title()
-                        taxpayer_fname = name_list_2[1].title()
             else:
-                taxpayer_lname = ""
-                taxpayer_fname = ""
+                taxpayer_name = ""
         else:
-            taxpayer_lname = ""
-            taxpayer_fname = ""
+            taxpayer_name = ""
+        print(taxpayer_name)
         # Signifies that process was successful to move onto access square footage data
         passthrough = True
     except:
@@ -157,19 +149,11 @@ def add_list(line):
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
-                        if (
-                            line[1].lower() == name_list_2[0].lower()
-                            and line[0].lower() == name_list_2[1].lower()
-                        ):
-                            taxpayer_lname = ""
-                            taxpayer_fname = ""
+                        if line[1].lower() == name_list_2[0].lower():
+                            taxpayer_name = ""
                             break
-                        else:
-                            taxpayer_lname = name_list_2[0].title()
-                            taxpayer_fname = name_list_2[1].title()
                 else:
-                    taxpayer_lname = ""
-                    taxpayer_fname = ""
+                    taxpayer_name = ""
                 # Creates url based off of pin_id(Parcel Number)
                 # Url is not verified to avoid web visit restriction
                 url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
@@ -182,7 +166,7 @@ def add_list(line):
             add_info = (False,)
             return add_info
     # Appends previous information scraped
-    add_info = (passthrough, taxpayer_fname, taxpayer_lname, present_use, url, pin_id)
+    add_info = (passthrough, taxpayer_name, present_use, url, pin_id)
     return add_info
 
 
@@ -191,12 +175,11 @@ def square_footage(all_info, line):
     global error_message
     if all_info[0] == True:
         # Takes square_ft data from clients
-        taxpayer_fname = all_info[1]
-        taxpayer_lname = all_info[2]
-        present_use = all_info[3]
-        url = all_info[4]
-        pin_id = all_info[5]
-        present_use_lower = all_info[3].lower()
+        taxpayer_name = all_info[1]
+        present_use = all_info[2]
+        url = all_info[3]
+        pin_id = all_info[4]
+        present_use_lower = all_info[2].lower()
         if (
             "condo" not in present_use_lower
             and "apartment" not in present_use_lower
@@ -262,8 +245,7 @@ def square_footage(all_info, line):
             new_year_built = ""
         line.extend(
             (
-                taxpayer_fname,
-                taxpayer_lname,
+                taxpayer_name,
                 new_square_ft,
                 new_year_built,
                 present_use,
@@ -272,7 +254,7 @@ def square_footage(all_info, line):
         )
         return line
     else:
-        line.extend(("", "", "", "", "", error_message))
+        line.extend(("", "", "", "", error_message))
         return line
 
 
@@ -301,8 +283,7 @@ with open(PATH, "r") as csv_file:
         # Adds additional elements to top row of csv data
         first_line.extend(
             (
-                "Mod-Taxpayer First Name",
-                "Mod-Taxpayer Last Name",
+                "Mod-Taxpayer Name",
                 "Mod-Real Square Footage",
                 "Mod-Year Built",
                 "Mod-Present Use",
