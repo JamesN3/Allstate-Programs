@@ -23,11 +23,11 @@ root.geometry("600x400")
 
 root.filename = filedialog.askopenfilename(
     title="Select A File",
-    # initialdir="/downloads",
     filetypes=(("csv files", "*.csv"),),
 )
-
-
+# my_label contains file patth
+my_label = Label(root, text=root.filename).pack()
+PATH = root.filename
 # def stop():
 #     my_progress.stop()
 
@@ -54,27 +54,7 @@ root.filename = filedialog.askopenfilename(
 
 # my_label = Label(root, text="")
 # my_label.pack(pady=20)
-root.mainloop()
 
-
-# Message is to inform user about program operations
-print(
-    "\nOutput file will be in same folder as input file\nNew file name will be "
-    "new_{file_name}.csv"
-    ""
-)
-
-# Takes the PATH of the csv file
-PATH = str(
-    input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
-)
-
-# Checks if file path exists and waits until user inputs correct one
-while not path.exists(PATH):
-    print("Error with file path, check it is correct and compare with example")
-    PATH = str(
-        input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
-    )
 
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
@@ -311,3 +291,5 @@ with open(PATH, "r") as csv_file:
             for line in executor.map(square_footage, all_info, csv_reader):
                 csv_writer.writerow(line)
 print("Finished!")
+my_label_2 = Label(root, text="Finished").pack()
+root.mainloop()
