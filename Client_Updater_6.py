@@ -55,7 +55,7 @@ def square_limit(square_bar, info):
         info_index = 0
         for line, info in zip(csv_reader, all_info):
             if info[0] == True:
-                present_use = info[1].lower()
+                present_use = info[2].lower()
                 if (
                     "condo" not in present_use
                     and "apartment" not in present_use
@@ -72,46 +72,46 @@ def add_list(line):
     # Converts spaces " " to "%20"
     address = str(line[2])
     address = address.replace(" ", "%20")
-    try:
-        # Takes pin_id or parcel number required to access web data and urls
-        pin_id = requests.get(
-            f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
-        ).json()["items"][0]["PIN"]
-        # Takes present_use data Ex:"Single Family(Res)" to put in csv file
-        # Creates url based off of pin_id(Parcel Number)
-        # Url is not verified to avoid web visit restriction
-        url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
-        source = requests.get(
-            f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-        ).json()
 
-        taxpayer_name = source["items"][0]["TAXPAYERNAME"]
-        present_use = source["items"][0]["PRESENTUSE"]
-        # Parse more accurately
-        if len(taxpayer_name) > 0:
-            if str(line[1]).lower() not in taxpayer_name.lower():
-                taxpayer_1 = taxpayer_name.replace("+", "|")
-                taxpayayer_2 = taxpayer_1.replace("&", "|")
-                name_list_1 = taxpayayer_2.split("|")
-                for name1 in name_list_1:
-                    name1 = name1.strip()
-                    name_list_2 = name1.split(" ")
-                    if (
-                        line[1].lower() == name_list_2[0].lower()
-                        and line[0].lower() == name_list_2[1].lower()
-                    ):
-                        taxpayer_lname = ""
-                        taxpayer_fname = ""
-                        break
-                    else:
-                        taxpayer_name = name_list_2[0].title()
+    def requester():
+        try:
+            # Takes pin_id or parcel number required to access web data and urls
+            pin_id = requests.get(
+                f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
+            ).json()["items"][0]["PIN"]
+            # Takes present_use data Ex:"Single Family(Res)" to put in csv file
+            # Creates url based off of pin_id(Parcel Number)
+            # Url is not verified to avoid web visit restriction
+            url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
+            source = requests.get(
+                f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
+            ).json()
+
+            taxpayer_name = source["items"][0]["TAXPAYERNAME"]
+            present_use = source["items"][0]["PRESENTUSE"]
+            # Parse more accurately
+            if len(taxpayer_name) > 0:
+                if str(line[1]).lower() not in taxpayer_name.lower():
+                    taxpayer_1 = taxpayer_name.replace("+", "|")
+                    taxpayayer_2 = taxpayer_1.replace("&", "|")
+                    name_list_1 = taxpayayer_2.split("|")
+                    for name1 in name_list_1:
+                        name1 = name1.strip()
+                        name_list_2 = name1.split(" ")
+                        if line[1].lower() == name_list_2[0].lower():
+                            taxpayer_name = ""
+                            break
+                else:
+                    taxpayer_name = ""
             else:
                 taxpayer_name = ""
-        else:
-            taxpayer_name = ""
-        # Signifies that process was successful to move onto access square footage data
-        passthrough = True
-    except:
+            # Signifies that process was successful to move onto access square footage data
+            return (True, taxpayer_name, present_use, url, pin_id)
+        except:
+            return (False,)
+
+    all_info = requester()
+    if all_info[0] == False:
         address = address.lower()
         # Dictionary that is circled through to see if search result can be recovered
         abb_dict = {
@@ -136,48 +136,8 @@ def add_list(line):
                 passthrough = True
         # If dictionary element changed, the program will submit another request for data to fix field
         if passthrough:
-            try:
-                # Takes pin_id or parcel number required to access web data and urls
-                pin_id = requests.get(
-                    f"https://gismaps.kingcounty.gov/parcelviewer2/addSearchHandler.ashx?add={address}"
-                ).json()["items"][0]["PIN"]
-                # Takes present_use data Ex:"Single Family(Res)" to put in csv file
-                source = requests.get(
-                    f"https://gismaps.kingcounty.gov/parcelviewer2/pvinfoquery.ashx?pin={pin_id}"
-                ).json()
-                taxpayer_name = source["items"][0]["TAXPAYERNAME"]
-                present_use = source["items"][0]["PRESENTUSE"]
-                if str(line[1]).lower() not in taxpayer_name.lower():
-                    taxpayer_1 = taxpayer_name.replace("+", "|")
-                    taxpayayer_2 = taxpayer_1.replace("&", "|")
-                    name_list_1 = taxpayayer_2.split("|")
-                    for name1 in name_list_1:
-                        name1 = name1.strip()
-                        name_list_2 = name1.split(" ")
-                        if (
-                            line[1].lower() == name_list_2[0].lower()
-                            and line[0].lower() == name_list_2[1].lower()
-                        ):
-                            taxpayer_name = ""
-                            break
-                        else:
-                            taxpayer_name = name_list_2[1].title()
-                else:
-                    taxpayer_name = ""
-                # Creates url based off of pin_id(Parcel Number)
-                # Url is not verified to avoid web visit restriction
-                url = f"https://blue.kingcounty.com/Assessor/eRealProperty/Detail.aspx?ParcelNbr={pin_id}"
-                # Signifies that process was successful to move onto access square footage data
-                passthrough = True
-            except:
-                add_info = (False,)
-                return add_info
-        else:
-            add_info = (False,)
-            return add_info
-    # Appends previous information scraped
-    add_info = (passthrough, taxpayer_name, present_use, url, pin_id)
-    return add_info
+            all_info = requester()
+    return all_info
 
 
 def square_footage(all_info, line):
@@ -264,7 +224,7 @@ def square_footage(all_info, line):
         )
         return line
     else:
-        line.extend(("", "", "", "", "", error_message))
+        line.extend(("", "", "", "", error_message))
         return line
 
 
