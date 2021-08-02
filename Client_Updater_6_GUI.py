@@ -10,6 +10,53 @@ import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
 
+# import time
+from tkinter import *
+from tkinter import filedialog
+from tkinter import ttk
+
+root = Tk()
+root.title("Yumio Marketer")
+root.iconbitmap(r"C:\Users\jamie\Documents\Allstate-Programs\Yumio logo.ico")
+root.geometry("600x400")
+
+
+root.filename = filedialog.askopenfilename(
+    title="Select A File",
+    # initialdir="/downloads",
+    filetypes=(("csv files", "*.csv"),),
+)
+
+
+# def stop():
+#     my_progress.stop()
+
+
+# def step():
+#     # my_progress["value"] += 20
+#     # my_progress.start(10)
+#     for x in range(5):
+#         my_label.config(text=my_progress["value"])
+#         my_progress["value"] += 20
+#         root.update_idletasks()
+#         # time.sleep(1)
+#     # if my_progress['value'] == 20:
+
+
+# my_progress = ttk.Progressbar(root, orient=HORIZONTAL, length=300, mode="determinate")
+# my_progress.pack(pady=20)
+
+# my_button = Button(root, text="Progress", command=step)
+# my_button.pack(pady=20)
+
+# my_button2 = Button(root, text="Stop", command=stop)
+# my_button2.pack(pady=20)
+
+# my_label = Label(root, text="")
+# my_label.pack(pady=20)
+root.mainloop()
+
+
 # Message is to inform user about program operations
 print(
     "\nOutput file will be in same folder as input file\nNew file name will be "
