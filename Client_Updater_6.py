@@ -35,6 +35,24 @@ new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
 def square_call(square_bar=1980, all_info=tuple()):
+    def square_limit(square_bar_test, all_info):
+        with open(PATH, "r") as csv_file:
+            csv_reader = csv.reader(csv_file)
+            next(csv_reader)
+            num_square_ft = 0
+            info_index = 0
+            for line, info in zip(csv_reader, all_info):
+                if info[0] == True:
+                    present_use = info[2].lower()
+                    if (
+                        "condo" not in present_use
+                        and "apartment" not in present_use
+                        and "mobile home" not in present_use
+                    ):
+                        if int(line[8]) <= square_bar_test:
+                            num_square_ft += 1
+        return num_square_ft
+
     num_square_ft = square_limit(square_bar, all_info)
     if num_square_ft < 999:
         if square_limit(square_bar + 10, all_info) >= 999:
@@ -47,23 +65,6 @@ def square_call(square_bar=1980, all_info=tuple()):
 
 
 # Counts the number of clients that fit within square_bar to determine bar to set to
-def square_limit(square_bar, info):
-    with open(PATH, "r") as csv_file:
-        csv_reader = csv.reader(csv_file)
-        next(csv_reader)
-        num_square_ft = 0
-        info_index = 0
-        for line, info in zip(csv_reader, all_info):
-            if info[0] == True:
-                present_use = info[2].lower()
-                if (
-                    "condo" not in present_use
-                    and "apartment" not in present_use
-                    and "mobile home" not in present_use
-                ):
-                    if int(line[8]) <= square_bar:
-                        num_square_ft += 1
-    return num_square_ft
 
 
 # Function that threads use
