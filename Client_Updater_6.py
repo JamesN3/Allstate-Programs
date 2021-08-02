@@ -64,9 +64,6 @@ def square_call(square_bar=1980, all_info=tuple()):
         return square_call(square_bar - 10, all_info)
 
 
-# Counts the number of clients that fit within square_bar to determine bar to set to
-
-
 # Function that threads use
 def add_list(line):
     # Take address and converts to search friendly form
