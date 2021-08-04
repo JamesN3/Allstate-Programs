@@ -1,67 +1,65 @@
 # Author: James Ngai(Allstate "HALE INSURANCE, INC.")
 # Program built solely for the use of Allstate Hale Insurance Inc
 #
-# Program takes prexisting client data and adds the client's
-# Housing Square Footage(Potentially), Present Use, and property detail url
+# Program takes prexisting client data aand compiles it into a csv file
 
 import requests
 import csv
 import concurrent.futures
 import threading
-from os import path
 from bs4 import BeautifulSoup
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import Frame
+
+if __name__ != "__main__":
+    quit()
 
 
 root = Tk()
+
 root.title("Yumio Marketer")
 root.iconbitmap("Yumio logo.ico")
 root.geometry("600x400")
 
-# class file_open(tk.frame):
-#     def __init__(self):
-#         root.title("Yumio Marketer")
-#         root.iconbitmap("Yumio logo.ico")
-#         root.geometry("600x400")
-#         button_1 = Button(
-#             root, text="Select File", pady=20, command=file_open.get_dir
-#         ).pack()
-#         my_label = Label(root, text=root.filename).pack()
-#         root.filename = filedialog.askopenfilename(
-#             title="Select A File",
-#             filetypes=(("csv files", "*.csv"),),
-#         )
-#         self.value = root.filename
-#         my_progress = ttk.Progressbar(
-#             root, orient=HORIZONTAL, length=300, mode="determinate"
-#         )
-#         my_progress.pack(pady=20)
-#         self.x = my_progress
 
-#     def get_file(self):
-#         return self.value
+class FileTaker:
+    file_path = ""
 
-#     def step(self):
-#         my_progress = self.x
-#         my_progress.start(0.1)
+    def __init__(self, master):
+        def get_dir():
+            FileTaker.file_path = filedialog.askopenfilename(
+                title="Select A File",
+                filetypes=(("csv files", "*.csv"),),
+            )
 
-#     def display(self):
-#         my_label_3 = Label(root, text="Finished").pack()
+        myFrame = Frame(master)
+        self.button = Button(
+            master, text="Select File", pady=20, command=get_dir()
+        ).pack()
+        self.my_label = Label(master, text=self.file_path).pack()
 
 
-# root = file_open(Tk())
-# PATH contains file path
+file_opener = FileTaker(root)
+my_label_3 = Label(root, text="Finished").pack()
+PATH = FileTaker.file_path
 
-root.filename = filedialog.askopenfilename(
-    title="Select A File",
-    filetypes=(("csv files", "*.csv"),),
-)
 
-my_label = Label(root, text=root.filename).pack()
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    row_count = sum(1 for row in csv_reader)
+    incrementor = 100 / row_count
 
-PATH = root.filename
+
+my_progress = ttk.Progressbar(root, orient=HORIZONTAL, length=300, mode="determinate")
+my_progress.pack(pady=20)
+
+
+def step():
+    my_progress.start(incrementor)
+    root.update()
+
 
 # Creates new file path for csv file that is being written
 last_index = PATH.rfind("\\")
@@ -294,5 +292,6 @@ with open(PATH, "r") as csv_file:
             # Maps function ensure the threads called first are executed first
             for line in executor.map(square_footage, all_info, csv_reader):
                 csv_writer.writerow(line)
+                step()
 my_label_3 = Label(root, text="Finished").pack()
 root.mainloop()
