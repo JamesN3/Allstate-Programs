@@ -7,64 +7,62 @@ import requests
 import csv
 import concurrent.futures
 import threading
+import queue
 from bs4 import BeautifulSoup
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
 from tkinter import Frame
-
-if __name__ != "__main__":
-    quit()
+from tkinter import messagebox
 
 
-root = Tk()
-
-root.title(text="Yumio Marketer")
-root.iconbitmap("Yumio logo.ico")
-root.geometry("600x400")
-
-
-class FileTaker:
+class Application:
     file_path = ""
+    my_progress = None
 
-    def __init__(self, master):
+    def __init__(self):
         def get_dir():
-            FileTaker.file_path = filedialog.askopenfilename(
+            Application.file_path = filedialog.askopenfilename(
                 title="Select A File",
                 filetypes=(("csv files", "*.csv"),),
             )
 
-        myFrame = Frame(master)
+        def submit_button():
+            continuer = True
+            self.button.destroy()
+            self.Button_2.destroy()
+
+        root.title("Yumio Marketer")
+        root.iconbitmap("Yumio logo.ico")
+        root.geometry("600x400")
         self.button = Button(
-            master, text="Select File", pady=20, command=get_dir()
+            root, text="Select File", pady=20, command=get_dir()
         ).pack()
-        self.my_label = Label(master, text=self.file_path).pack()
+        self.my_label = Label(root, text=self.file_path).pack()
+        self.my_progress = ttk.Progressbar(
+            root, orient=HORIZONTAL, length=300, mode="determinate"
+        ).pack(pady=20)
+        self.Button_2 = Button(root, text="Submit", command=submit_button)
+        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def step(self):
+        self.my_progress.start(incrementor)
+        root.update()
+
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to exit?"):
+            root.destroy()
+            quit()
+
+    def finish(self):
+        self.my_label_3 = Label(root, text="Finished").pack()
+
+    def reminder(self):
+        self.my_label_2 = Label(
+            root, text="Do not open csv file being written or read"
+        ).pack()
 
 
-file_opener = FileTaker(root)
-my_label_3 = Label(root, text="Finished").pack()
-PATH = file_opener.file_path
-
-
-with open(PATH, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    row_count = sum(1 for row in csv_reader)
-    incrementor = 100 / row_count
-
-
-my_progress = ttk.Progressbar(root, orient=HORIZONTAL, length=300, mode="determinate")
-my_progress.pack(pady=20)
-
-
-def step():
-    my_progress.start(incrementor)
-    root.update()
-
-
-root.mainloop()
-# Creates new file path for csv file that is being written
-last_index = PATH.rfind("\\")
-new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
 def square_call(square_bar=1980, all_info=tuple()):
@@ -257,6 +255,23 @@ def square_footage(all_info, line):
         return line
 
 
+root = Tk()
+
+file_opener = Application()
+
+PATH = file_opener.file_path
+
+
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    row_count = sum(1 for row in csv_reader)
+    incrementor = 100 / row_count
+
+
+# Creates new file path for csv file that is being written
+last_index = PATH.rfind("\\")
+new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     next(csv_reader)
@@ -269,7 +284,7 @@ tuple(all_info)
 square_bar = square_call(square_bar=1980, all_info=all_info)
 
 # Reminder to ensure program does not stop in execution
-my_label_2 = Label(root, text="Do not open csv file being written or read").pack()
+file_opener.reminder()
 # The message that is sent when an error occurs
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
 
@@ -293,5 +308,6 @@ with open(PATH, "r") as csv_file:
             # Maps function ensure the threads called first are executed first
             for line in executor.map(square_footage, all_info, csv_reader):
                 csv_writer.writerow(line)
-                step()
-my_label_3 = Label(root, text="Finished").pack()
+                file_opener.step()
+file_opener.finish()
+root.mainloop()
