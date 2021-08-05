@@ -308,7 +308,8 @@ with open(PATH, "r") as csv_file:
         # Adds additional elements to top row of csv data
         first_line.extend(
             (
-                "Mod-Taxpayer Name",
+                "Mod-Taxpayer First,",
+                "Mod-Taxpayer Last",
                 "Mod-Real Square Footage",
                 "Mod-Year Built",
                 "Mod-Present Use",
