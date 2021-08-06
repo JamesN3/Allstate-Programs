@@ -58,21 +58,6 @@ class Client:
         self.mod_pres = ""
         self.mod_url = error_message
         self.mod_pin_id = ""
-
-    def inital_packager(self):
-        return (
-            self.first,
-            self.last,
-            self.address,
-            self.city,
-            self.zipcd,
-            self.phone,
-            self.homeyr,
-            self.home_size,
-            self.estimated_value,
-            self.home_sale_date,
-        )
-
     def final_packager(self):
         return (
             self.first,
