@@ -1,4 +1,4 @@
-# Author: James Ngai(Allstate "HALE INSURANCE, INC.")
+# Author: James Ngai (Allstate "HALE INSURANCE, INC.")
 # Program built solely for the use of Allstate Hale Insurance Inc
 #
 # Program takes prexisting client data and adds the client's
@@ -131,7 +131,7 @@ def add_list(line):
     client_line = Client(line).lower()
     address = client_line.address
     address = address.replace(" ", "%20")
-
+    last_name = client_line.last
     def requester():
         try:
             # Takes pin_id or parcel number required to access web data and urls
@@ -150,14 +150,14 @@ def add_list(line):
             present_use = source["items"][0]["PRESENTUSE"]
             # Parse more accurately
             if len(taxpayer_name) > 0:
-                if str(line[1]).lower() not in taxpayer_name.lower():
+                if str(last_name).lower() not in taxpayer_name.lower():
                     taxpayer_1 = taxpayer_name.replace("+", "|")
                     taxpayayer_2 = taxpayer_1.replace("&", "|")
                     name_list_1 = taxpayayer_2.split("|")
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
-                        if line[1].lower() == name_list_2[0].lower():
+                        if last_name.lower() == name_list_2[0].lower():
                             taxpayer_fname = ""
                             taxpayer_lname = ""
                             break
@@ -288,7 +288,7 @@ with open(PATH, "r") as csv_file:
     first_line = next(csv_reader)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Maps function ensure the threads called first are executed first
-        all_info = [line for line in executor.map(add_list, csv_reader)]
+        all_info = [client_line for client_line in executor.map(add_list, csv_reader)]
 tuple(all_info)
 
 # Calls function to get bar to set to
