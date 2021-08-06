@@ -180,7 +180,7 @@ def add_list(line):
             client_line.mod_url = url
             client_line.mod_pin_id = pin_id
         except:
-            pass
+            client.mod_passthrough = False
 
     if client_line.mod_passthrough == False:
         # Dictionary that is circled through to see if search result can be recovered
