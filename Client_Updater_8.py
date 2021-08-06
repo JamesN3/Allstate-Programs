@@ -45,11 +45,12 @@ class Client:
         self.address = line[2]
         self.city = line[3]
         self.zipcd = line[4]
-        self.phone = line[5]
-        self.homeyr = line[6]
-        self.home_size = int(line[7])
-        self.estimated_value = line[8]
-        self.home_sale_date = line[9]
+        self.state = line[5]
+        self.phone = line[6]
+        self.homeyr = line[7]
+        self.home_size = int(line[8])
+        self.estimated_value = line[9]
+        self.home_sale_date = line[10]
         self.mod_passthrough = False
         self.mod_first = ""
         self.mod_last = ""
@@ -57,7 +58,8 @@ class Client:
         self.mod_yr = ""
         self.mod_pres = ""
         self.mod_url = error_message
-        self.mod_pin_id = ""    
+        self.mod_pin_id = ""
+
     def final_packager(self):
         return (
             self.first,
@@ -65,6 +67,7 @@ class Client:
             self.address,
             self.city,
             self.zipcd,
+            self.state,
             self.phone,
             self.homeyr,
             self.home_size,
@@ -113,10 +116,11 @@ def square_call(square_bar=1980, all_info=tuple()):
 def add_list(line):
     # Take address and converts to search friendly form
     # Converts spaces " " to "%20"
-    client_line = Client(line).lower()
-    address = client_line.address
+    client_line = Client(line)
+    address = client_line.address.lower()
     address = address.replace(" ", "%20")
     last_name = client_line.last
+
     def requester():
         try:
             # Takes pin_id or parcel number required to access web data and urls
@@ -157,16 +161,17 @@ def add_list(line):
                 taxpayer_fname = ""
                 taxpayer_lname = ""
             # Signifies that process was successful to move onto access square footage data
-            client.mod_passthrough = True
-            client.mod_first = taxpayer_fname
+            client_line.mod_passthrough = True
+            client_line.mod_first = taxpayer_fname
             client_line.mod_first = taxpayer_fname
             client_line.mod_last = taxpayer_lname
             client_line.mod_pres = present_use
             client_line.mod_url = url
             client_line.mod_pin_id = pin_id
         except:
-            client.mod_passthrough = False
+            client_line.mod_passthrough = False
 
+    requester()
     if client_line.mod_passthrough == False:
         # Dictionary that is circled through to see if search result can be recovered
         abb_dict = {
@@ -262,10 +267,10 @@ def square_footage(client_line):
             new_square_ft = ""
             new_year_built = ""
         client_line.mod_sqft = new_square_ft
-        client_line.mod_sqft = new_year_built
-        return client_line.final_packager
+        client_line.mod_yr = new_year_built
+        return client_line.final_packager()
     else:
-        return client_line.final_packager
+        return client_line.final_packager()
 
 
 with open(PATH, "r") as csv_file:
