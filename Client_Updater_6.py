@@ -139,8 +139,6 @@ def add_list(line):
 
 
 def square_footage(all_info, line):
-    global square_bar
-    global error_message
     if all_info[0] == True:
         # Takes square_ft data from clients
         taxpayer_name = all_info[1]

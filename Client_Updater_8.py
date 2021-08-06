@@ -1,87 +1,116 @@
 # Author: James Ngai(Allstate "HALE INSURANCE, INC.")
 # Program built solely for the use of Allstate Hale Insurance Inc
 #
-# Program takes prexisting client data aand compiles it into a csv file
+# Program takes prexisting client data and adds the client's
+# Housing Square Footage(Potentially), Present Use, and property detail url
 
 import requests
 import csv
 import concurrent.futures
-import threading
-import queue
+from os import path
 from bs4 import BeautifulSoup
-from tkinter import *
-from tkinter import filedialog
-from tkinter import ttk
-from tkinter import Frame
-from tkinter import messagebox
+
+# Message is to inform user about program operations
+print(
+    "\nOutput file will be in same folder as input file\nNew file name will be "
+    "new_{file_name}.csv"
+    ""
+)
+
+# Takes the PATH of the csv file
+PATH = str(
+    input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
+)
+
+# Checks if file path exists and waits until user inputs correct one
+while not path.exists(PATH):
+    print("Error with file path, check it is correct and compare with example")
+    PATH = str(
+        input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
+    )
+
+# Creates new file path for csv file that is being written
+last_index = PATH.rfind("\\")
+new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 
 
-class Application:
-    file_path = ""
-    my_progress = None
+# The message that is sent when an error occurs
+error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
 
-    def __init__(self):
-        def get_dir():
-            Application.file_path = filedialog.askopenfilename(
-                title="Select A File",
-                filetypes=(("csv files", "*.csv"),),
-            )
 
-        def submit_button():
-            continuer = True
-            self.button.destroy()
-            self.Button_2.destroy()
+class Client:
+    def __init__(self, line):
+        self.first = line[0]
+        self.last = line[1]
+        self.address = line[2]
+        self.city = line[3]
+        self.zipcd = line[4]
+        self.phone = line[5]
+        self.homeyr = line[6]
+        self.home_size = line[7]
+        self.estimated_value = line[8]
+        self.home_sale_date = line[9]
+        self.mod_passthrough = False
+        self.mod_first = ""
+        self.mod_last = ""
+        self.mod_sqft = ""
+        self.mod_yr = ""
+        self.mod_pres = ""
+        self.mod_url = error_message
+        self.mod_pin_id = ""
 
-        root.title("Yumio Marketer")
-        root.iconbitmap("Yumio logo.ico")
-        root.geometry("600x400")
-        self.button = Button(
-            root, text="Select File", pady=20, command=get_dir()
-        ).pack()
-        self.my_label = Label(root, text=self.file_path).pack()
-        self.my_progress = ttk.Progressbar(
-            root, orient=HORIZONTAL, length=300, mode="determinate"
-        ).pack(pady=20)
-        self.Button_2 = Button(root, text="Submit", command=submit_button)
-        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+    def inital_packager(self):
+        return (
+            self.first,
+            self.last,
+            self.address,
+            self.city,
+            self.zipcd,
+            self.phone,
+            self.homeyr,
+            self.home_size,
+            self.estimated_value,
+            self.home_sale_date,
+        )
 
-    def step(self):
-        self.my_progress.start(incrementor)
-        root.update()
-
-    def on_closing(self):
-        if messagebox.askokcancel("Quit", "Do you want to exit?"):
-            root.destroy()
-            quit()
-
-    def finish(self):
-        self.my_label_3 = Label(root, text="Finished").pack()
-
-    def reminder(self):
-        self.my_label_2 = Label(
-            root, text="Do not open csv file being written or read"
-        ).pack()
+    def final_packager(self):
+        return (
+            self.first,
+            self.last,
+            self.address,
+            self.city,
+            self.zipcd,
+            self.phone,
+            self.homeyr,
+            self.home_size,
+            self.estimated_value,
+            self.home_sale_date,
+            self.mod_first,
+            self.mod_last,
+            self.mod_sqft,
+            self.mod_yr,
+            self.mod_pres,
+            self.mod_url,
+        )
 
 
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
 def square_call(square_bar=1980, all_info=tuple()):
     def square_limit(square_bar_test, all_info):
-        with open(PATH, "r") as csv_file:
-            csv_reader = csv.reader(csv_file)
-            next(csv_reader)
-            num_square_ft = 0
-            info_index = 0
-            for line, info in zip(csv_reader, all_info):
-                if info[0] == True:
-                    present_use = info[3].lower()
-                    if (
-                        "condo" not in present_use
-                        and "apartment" not in present_use
-                        and "mobile home" not in present_use
-                    ):
-                        if int(line[8]) <= square_bar_test:
-                            num_square_ft += 1
+        num_square_ft = 0
+        info_index = 0
+        for client_line in all_info:
+            if client_line.mod_passthrough == True:
+                present_use = client_line.mod_pres.lower()
+                if (
+                    "condo" not in present_use
+                    and "apartment" not in present_use
+                    and "mobile home" not in present_use
+                ):
+                    if int(client_line.home_size) <= square_bar_test:
+                        num_square_ft += 1
+
         return num_square_ft
 
     num_square_ft = square_limit(square_bar, all_info)
@@ -99,7 +128,8 @@ def square_call(square_bar=1980, all_info=tuple()):
 def add_list(line):
     # Take address and converts to search friendly form
     # Converts spaces " " to "%20"
-    address = str(line[2])
+    client_line = Client(line).lower()
+    address = client_line.address
     address = address.replace(" ", "%20")
 
     def requester():
@@ -142,13 +172,17 @@ def add_list(line):
                 taxpayer_fname = ""
                 taxpayer_lname = ""
             # Signifies that process was successful to move onto access square footage data
-            return (True, taxpayer_fname, taxpayer_lname, present_use, url, pin_id)
+            client.mod_passthrough = True
+            client.mod_first = taxpayer_fname
+            client_line.mod_first = taxpayer_fname
+            client_line.mod_last = taxpayer_lname
+            client_line.mod_pres = present_use
+            client_line.mod_url = url
+            client_line.mod_pin_id = pin_id
         except:
-            return (False,)
+            pass
 
-    all_info = requester()
-    if all_info[0] == False:
-        address = address.lower()
+    if client_line.mod_passthrough == False:
         # Dictionary that is circled through to see if search result can be recovered
         abb_dict = {
             "mt": "mountain",
@@ -161,37 +195,30 @@ def add_list(line):
             "lk": "lake",
             "shangrila": "shangri la",
             "shoreclub": "shore club",
-            "pl": "place",
         }
-        # Means process has failed thus far unless dictionary change finds search result
-        passthrough = False
         # Loops through dictionary to see if dictionary result is in address
         for abbreviation, full in abb_dict.items():
             # Sees if results is in address and will fix search result and the computer well tell computer
             if f"%20{abbreviation}%20" in address:
                 address = address.replace(abbreviation, full)
-                passthrough = True
+                client_line.mod_passthrough = True
         # If dictionary element changed, the program will submit another request for data to fix field
-        if passthrough:
-            all_info = requester()
-    return all_info
+        if client_line.mod_passthrough:
+            requester()
+    return client_line
 
 
-def square_footage(all_info, line):
-    if all_info[0] == True:
+def square_footage(client_line):
+    if client_line.mod_passthrough:
         # Takes square_ft data from clients
-        taxpayer_fname = all_info[1]
-        taxpayer_lname = all_info[2]
-        present_use = all_info[3]
-        url = all_info[4]
-        pin_id = all_info[5]
-        present_use_lower = all_info[3].lower()
+        pin_id = client_line.mod_pin_id
+        present_use_lower = client_line.mod_pres.lower()
         if (
             "condo" not in present_use_lower
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
         ):
-            square_ft = int(line[8])
+            square_ft = int(client_line.home_size)
             if square_ft <= square_bar:
                 try:
                     # Takes request for square footage
@@ -249,42 +276,16 @@ def square_footage(all_info, line):
             # Appends dashes to maintain csv structure
             new_square_ft = ""
             new_year_built = ""
-        line.extend(
-            (
-                taxpayer_fname,
-                taxpayer_lname,
-                new_square_ft,
-                new_year_built,
-                present_use,
-                url,
-            )
-        )
-        return line
+        client_line.mod_sqft = new_square_ft
+        client_line.mod_sqft = new_year_built
+        return client_line.final_packager
     else:
-        line.extend(("", "", "", "", "", error_message))
-        return line
-
-
-root = Tk()
-
-file_opener = Application()
-
-PATH = file_opener.file_path
+        return client_line.final_packager
 
 
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
-    row_count = sum(1 for row in csv_reader)
-    incrementor = 100 / row_count
-
-
-# Creates new file path for csv file that is being written
-last_index = PATH.rfind("\\")
-new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
-
-with open(PATH, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    next(csv_reader)
+    first_line = next(csv_reader)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Maps function ensure the threads called first are executed first
         all_info = [line for line in executor.map(add_list, csv_reader)]
@@ -294,31 +295,24 @@ tuple(all_info)
 square_bar = square_call(square_bar=1980, all_info=all_info)
 
 # Reminder to ensure program does not stop in execution
-file_opener.reminder()
-# The message that is sent when an error occurs
-error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
+print("Reminder: Do not open the csv file that is being read or written!")
 
-with open(PATH, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    first_line = next(csv_reader)
-    with open(new_PATH, "w") as new_file:
-        csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
-        # Adds additional elements to top row of csv data
-        first_line.extend(
-            (
-                "Mod-Taxpayer First,",
-                "Mod-Taxpayer Last",
-                "Mod-Real Square Footage",
-                "Mod-Year Built",
-                "Mod-Present Use",
-                "Mod-URL",
-            )
+with open(new_PATH, "w") as new_file:
+    csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
+    # Adds additional elements to top row of csv data
+    first_line.extend(
+        (
+            "Mod-Taxpayer First",
+            "Mod-Taxpayer Last",
+            "Mod-Real Square Footage",
+            "Mod-Year Built",
+            "Mod-Present Use",
+            "Mod-URL",
         )
-        csv_writer.writerow(first_line)
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            # Maps function ensure the threads called first are executed first
-            for line in executor.map(square_footage, all_info, csv_reader):
-                csv_writer.writerow(line)
-                file_opener.step()
-file_opener.finish()
-root.mainloop()
+    )
+    csv_writer.writerow(first_line)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Maps function ensure the threads called first are executed first
+        for line in executor.map(square_footage, all_info):
+            csv_writer.writerow(line)
+print("Finished!")
