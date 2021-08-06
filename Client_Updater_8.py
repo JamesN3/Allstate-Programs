@@ -47,7 +47,7 @@ class Client:
         self.zipcd = line[4]
         self.phone = line[5]
         self.homeyr = line[6]
-        self.home_size = line[7]
+        self.home_size = int(line[7])
         self.estimated_value = line[8]
         self.home_sale_date = line[9]
         self.mod_passthrough = False
@@ -57,7 +57,7 @@ class Client:
         self.mod_yr = ""
         self.mod_pres = ""
         self.mod_url = error_message
-        self.mod_pin_id = ""
+        self.mod_pin_id = ""    
     def final_packager(self):
         return (
             self.first,
@@ -93,7 +93,7 @@ def square_call(square_bar=1980, all_info=tuple()):
                     and "apartment" not in present_use
                     and "mobile home" not in present_use
                 ):
-                    if int(client_line.home_size) <= square_bar_test:
+                    if client_line.home_size <= square_bar_test:
                         num_square_ft += 1
 
         return num_square_ft
@@ -203,7 +203,7 @@ def square_footage(client_line):
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
         ):
-            square_ft = int(client_line.home_size)
+            square_ft = client_line.home_size
             if square_ft <= square_bar:
                 try:
                     # Takes request for square footage
