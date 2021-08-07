@@ -7,35 +7,65 @@
 import requests
 import csv
 import concurrent.futures
-from os import path
+import threading
+import queue
 from bs4 import BeautifulSoup
-
-# Message is to inform user about program operations
-print(
-    "\nOutput file will be in same folder as input file\nNew file name will be "
-    "new_{file_name}.csv"
-    ""
-)
-
-# Takes the PATH of the csv file
-PATH = str(
-    input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
-)
-
-# Checks if file path exists and waits until user inputs correct one
-while not path.exists(PATH):
-    print("Error with file path, check it is correct and compare with example")
-    PATH = str(
-        input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
-    )
-
-# Creates new file path for csv file that is being written
-last_index = PATH.rfind("\\")
-new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
+from tkinter import *
+from tkinter import filedialog
+from tkinter import ttk
+from tkinter import Frame
+from tkinter import messagebox
 
 
 # The message that is sent when an error occurs
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
+
+
+class Application:
+    file_path = ""
+    my_progress = None
+
+    def __init__(self):
+        def get_dir():
+            Application.file_path = filedialog.askopenfilename(
+                title="Select A File",
+                filetypes=(("csv files", "*.csv"),),
+            )
+
+        def submit_button():
+            continuer = True
+            self.button.destroy()
+            self.Button_2.destroy()
+
+        root.title("Yumio Marketer")
+        root.iconbitmap("Yumio logo.ico")
+        root.geometry("600x400")
+        self.button = Button(
+            root, text="Select File", pady=20, command=get_dir()
+        ).pack()
+        self.my_label = Label(root, text=self.file_path).pack()
+        self.my_progress = ttk.Progressbar(
+            root, orient=HORIZONTAL, length=300, mode="determinate"
+        ).pack(pady=20)
+        self.Button_2 = Button(root, text="Submit", command=submit_button)
+        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    def step(self):
+        self.my_progress.start(incrementor)
+        root.update()
+
+    def on_closing(self):
+        if messagebox.askokcancel("Quit", "Do you want to exit?"):
+            root.destroy()
+            quit()
+
+    def finish(self):
+        self.my_label_3 = Label(root, text="Finished").pack()
+
+    def reminder(self):
+        self.my_label_2 = Label(
+            root, text="Do not open csv file being written or read"
+        ).pack()
 
 
 class Client:
@@ -195,6 +225,7 @@ def add_list(line):
         # If dictionary element changed, the program will submit another request for data to fix field
         if client_line.mod_passthrough:
             requester()
+    file_opener.step()
     return client_line
 
 
@@ -273,6 +304,20 @@ def square_footage(client_line):
         return client_line.final_packager()
 
 
+root = Tk()
+
+file_opener = Application()
+
+PATH = file_opener.file_path
+# Creates new file path for csv file that is being written
+last_index = PATH.rfind("\\")
+new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
+
+with open(PATH, "r") as csv_file:
+    csv_reader = csv.reader(csv_file)
+    row_count = sum(1 for row in csv_reader)
+    incrementor = 100 / row_count
+
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
@@ -285,7 +330,7 @@ tuple(all_info)
 square_bar = square_call(square_bar=1980, all_info=all_info)
 
 # Reminder to ensure program does not stop in execution
-print("Reminder: Do not open the csv file that is being read or written!")
+file_opener.reminder()
 
 with open(new_PATH, "w") as new_file:
     csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
@@ -305,7 +350,8 @@ with open(new_PATH, "w") as new_file:
         # Maps function ensure the threads called first are executed first
         for line in executor.map(square_footage, all_info):
             csv_writer.writerow(line)
-print("Finished!")
 
+file_opener.finish()
+root.mainloop()
 if __name__ != "__main__":
     quit()
