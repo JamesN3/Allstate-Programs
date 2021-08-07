@@ -23,9 +23,9 @@ error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealpr
 
 class Application:
     file_path = ""
-    my_progress = None
+    progress_bar = None
 
-    def __init__(self):
+    def __init__(self, master):
         def get_dir():
             Application.file_path = filedialog.askopenfilename(
                 title="Select A File",
@@ -37,34 +37,44 @@ class Application:
             self.button.destroy()
             self.Button_2.destroy()
 
-        root.title("Yumio Marketer")
-        root.iconbitmap("Yumio logo.ico")
-        root.geometry("600x400")
+        def get_file_but():
+            get_dir()
+
+        self.master = master
+        self.master.title("Yumio Marketer")
+        self.master.iconbitmap("Yumio logo.ico")
+        self.master.geometry("600x400")
         self.button = Button(
-            root, text="Select File", pady=20, command=get_dir()
+            self.master,
+            text="Select File",
+            pady=20,
+            command=get_dir,  # threading.Thread(target=),
         ).pack()
-        self.my_label = Label(root, text=self.file_path).pack()
-        self.my_progress = ttk.Progressbar(
-            root, orient=HORIZONTAL, length=300, mode="determinate"
+        self.my_label = Label(self.master, text=self.file_path).pack()
+        self.progress_bar = ttk.Progressbar(
+            self.master,
+            orient=HORIZONTAL,
+            length=300,
+            mode="determinate",
         ).pack(pady=20)
-        self.Button_2 = Button(root, text="Submit", command=submit_button)
-        root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.Button_2 = Button(self.master, text="Submit", command=submit_button)
+        master.protocol("WM_DELETE_WINDOW", self.on_closing)
+        threading.Thread.__init__(self)
 
     def step(self):
-        self.my_progress.start(incrementor)
-        root.update()
+        self.progress_bar.start(incrementor)
 
     def on_closing(self):
         if messagebox.askokcancel("Quit", "Do you want to exit?"):
-            root.destroy()
+            self.master.destroy()
             quit()
 
     def finish(self):
-        self.my_label_3 = Label(root, text="Finished").pack()
+        self.my_label_3 = Label(self.master, text="Finished").pack()
 
     def reminder(self):
         self.my_label_2 = Label(
-            root, text="Do not open csv file being written or read"
+            self.master, text="Do not open csv file being written or read"
         ).pack()
 
 
@@ -306,7 +316,8 @@ def square_footage(client_line):
 
 root = Tk()
 
-file_opener = Application()
+file_opener = Application(root)
+
 
 PATH = file_opener.file_path
 # Creates new file path for csv file that is being written
@@ -353,5 +364,3 @@ with open(new_PATH, "w") as new_file:
 
 file_opener.finish()
 root.mainloop()
-if __name__ != "__main__":
-    quit()
