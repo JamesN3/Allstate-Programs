@@ -140,9 +140,8 @@ def add_list(line):
             # Parse more accurately
             if len(taxpayer_name) > 0:
                 if str(last_name).lower() not in taxpayer_name.lower():
-                    taxpayer_1 = taxpayer_name.replace("+", "|")
-                    taxpayayer_2 = taxpayer_1.replace("&", "|")
-                    name_list_1 = taxpayayer_2.split("|")
+                    taxpayer_1 = taxpayer_name.replace("+", "&")
+                    name_list_1 = taxpayer_1.split("&")
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")

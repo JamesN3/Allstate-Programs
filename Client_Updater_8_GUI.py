@@ -22,12 +22,11 @@ error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealpr
 
 
 class Application:
-    file_path = ""
     progress_bar = None
 
     def __init__(self, master):
         def get_dir():
-            Application.file_path = filedialog.askopenfilename(
+            self.file_path = filedialog.askopenfilename(
                 title="Select A File",
                 filetypes=(("csv files", "*.csv"),),
             )
@@ -40,6 +39,7 @@ class Application:
         def get_file_but():
             get_dir()
 
+        self.file_path = ""
         self.master = master
         self.master.title("Yumio Marketer")
         self.master.iconbitmap("Yumio logo.ico")
@@ -180,9 +180,8 @@ def add_list(line):
             # Parse more accurately
             if len(taxpayer_name) > 0:
                 if str(last_name).lower() not in taxpayer_name.lower():
-                    taxpayer_1 = taxpayer_name.replace("+", "|")
-                    taxpayayer_2 = taxpayer_1.replace("&", "|")
-                    name_list_1 = taxpayayer_2.split("|")
+                    taxpayer_1 = taxpayer_name.replace("+", "&")
+                    name_list_1 = taxpayer_1.split("&")
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
