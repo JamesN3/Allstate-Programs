@@ -41,14 +41,14 @@ error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealpr
 class Client:
     def __init__(self, line):
         self.__first = line[0]
-        self._last = line[1]
-        self._address = line[2]
+        self.__last = line[1]
+        self.__address = line[2]
         self.__city = line[3]
         self.__zipcd = line[4]
         self.__state = line[5]
         self.__phone = line[6]
         self.__homeyr = line[7]
-        self._home_size = int(line[8])
+        self.__home_size = int(line[8])
         self.__estimated_value = line[9]
         self.__home_sale_date = line[10]
         self.mod_passthrough = False
@@ -63,14 +63,14 @@ class Client:
     def final_packager(self):
         return (
             self.__first,
-            self._last,
-            self._address,
+            self.__last,
+            self.__address,
             self.__city,
             self.__zipcd,
             self.__state,
             self.__phone,
             self.__homeyr,
-            self._home_size,
+            self.__home_size,
             self.__estimated_value,
             self.__home_sale_date,
             self.mod_first,
@@ -96,7 +96,7 @@ def square_call(square_bar=1980, all_info=tuple()):
                     and "apartment" not in present_use
                     and "mobile home" not in present_use
                 ):
-                    if client_line._home_size <= square_bar_test:
+                    if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
 
         return num_square_ft
@@ -117,9 +117,9 @@ def add_list(line):
     # Take address and converts to search friendly form
     # Converts spaces " " to "%20"
     client_line = Client(line)
-    address = client_line._address.lower()
+    address = client_line._Client__address.lower()
     address = address.replace(" ", "%20")
-    last_name = client_line._last
+    last_name = client_line._Client__last
 
     def requester():
         try:
@@ -207,7 +207,7 @@ def square_footage(client_line):
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
         ):
-            square_ft = client_line._home_size
+            square_ft = client_line._Client__home_size
             if square_ft <= square_bar:
                 try:
                     # Takes request for square footage
