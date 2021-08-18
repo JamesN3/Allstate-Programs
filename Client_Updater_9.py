@@ -160,8 +160,8 @@ def add_list(line):
                             break
                         else:
                             if len(name_list_2) >= 2:
-                                taxpayer_fname = name_list_2[1]
-                                taxpayer_lname = name_list_2[0]
+                                taxpayer_fname = name_list_2[1].title()
+                                taxpayer_lname = name_list_2[0].title()
                 else:
                     taxpayer_fname = ""
                     taxpayer_lname = ""
