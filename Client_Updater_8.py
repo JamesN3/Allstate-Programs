@@ -54,8 +54,8 @@ class Client:
         self.mod_passthrough = False
         self.mod_first = ""
         self.mod_last = ""
-        self.mod_sqft = ""
         self.mod_yr = ""
+        self.mod_sqft = ""
         self.mod_pres = ""
         self.mod_url = error_message
         self.mod_pin_id = ""
@@ -75,8 +75,8 @@ class Client:
             self.__home_sale_date,
             self.mod_first,
             self.mod_last,
-            self.mod_sqft,
             self.mod_yr,
+            self.mod_sqft,
             self.mod_pres,
             self.mod_url,
         )
@@ -293,8 +293,8 @@ with open(new_PATH, "w") as new_file:
         (
             "Mod-Taxpayer First",
             "Mod-Taxpayer Last",
-            "Mod-Real Square Footage",
             "Mod-Year Built",
+            "Mod-Real Square Footage",
             "Mod-Present Use",
             "Mod-URL",
         )
