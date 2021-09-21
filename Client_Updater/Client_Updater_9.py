@@ -104,6 +104,7 @@ def square_call(square_bar=1980, all_info=tuple()):
                     "condo" not in present_use
                     and "apartment" not in present_use
                     and "mobile home" not in present_use
+                    and "townhouse" not in present_use
                 ):
                     if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
@@ -147,6 +148,7 @@ def add_list(line):
             taxpayer_name = source["items"][0]["TAXPAYERNAME"]
             present_use = source["items"][0]["PRESENTUSE"]
             # Parse more accurately
+            taxpayer_list_name = []
             if len(taxpayer_name) > 0:
                 if str(last_name).lower() not in taxpayer_name.lower():
                     taxpayer_1 = taxpayer_name.replace("+", "&")
@@ -155,24 +157,23 @@ def add_list(line):
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
                         if last_name.lower() == name_list_2[0].lower():
-                            taxpayer_fname = ""
-                            taxpayer_lname = ""
+                            taxpayer_list_name[0] = ""
+                            taxpayer_list_name[1] = ""
                             break
                         else:
                             if len(name_list_2) >= 2:
-                                taxpayer_fname = name_list_2[1].title()
-                                taxpayer_lname = name_list_2[0].title()
+                                taxpayer_list_name[0] = name_list_2[1].title()
+                                taxpayer_list_name[1] = name_list_2[0].title()
                 else:
-                    taxpayer_fname = ""
-                    taxpayer_lname = ""
+                    taxpayer_list_name[0] = ""
+                    taxpayer_list_name[1] = ""
             else:
-                taxpayer_fname = ""
-                taxpayer_lname = ""
+                taxpayer_list_name[0] = ""
+                taxpayer_list_name[1] = ""
             # Signifies that process was successful to move onto access square footage data
             client_line.mod_passthrough = True
-            client_line.mod_first = taxpayer_fname
-            client_line.mod_first = taxpayer_fname
-            client_line.mod_last = taxpayer_lname
+            client_line.mod_first = taxpayer_list_name[0]
+            client_line.mod_last = taxpayer_list_name[1]
             client_line.mod_pres = present_use
             client_line.mod_url = url
             client_line.mod_pin_id = pin_id
@@ -215,6 +216,7 @@ def square_footage(client_line):
             "condo" not in present_use_lower
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
+            and "townhouse" not in present_use_lower
         ):
             square_ft = client_line._Client__home_size
             if square_ft <= square_bar:
