@@ -108,7 +108,6 @@ def square_call(square_bar=1980, all_info=tuple()):
                 ):
                     if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
-
         return num_square_ft
 
     num_square_ft = square_limit(square_bar, all_info)
@@ -148,11 +147,12 @@ def add_list(line):
             taxpayer_name = source["items"][0]["TAXPAYERNAME"]
             present_use = source["items"][0]["PRESENTUSE"]
             # Parse more accurately
-            taxpayer_list_name = []
+            taxpayer_list_name = ["",""]
             if len(taxpayer_name) > 0:
                 if str(last_name).lower() not in taxpayer_name.lower():
                     taxpayer_1 = taxpayer_name.replace("+", "&")
                     name_list_1 = taxpayer_1.split("&")
+                    beenthrough = True
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
@@ -161,9 +161,11 @@ def add_list(line):
                             taxpayer_list_name[1] = ""
                             break
                         else:
-                            if len(name_list_2) >= 2:
-                                taxpayer_list_name[0] = name_list_2[1].title()
-                                taxpayer_list_name[1] = name_list_2[0].title()
+                            if beenthrough:
+                                if len(name_list_2) >= 2:
+                                    taxpayer_list_name[0] = name_list_2[1].title()
+                                    taxpayer_list_name[1] = name_list_2[0].title()
+                                    beenthrough = False
                 else:
                     taxpayer_list_name[0] = ""
                     taxpayer_list_name[1] = ""
