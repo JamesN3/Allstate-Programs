@@ -1,1 +1,1 @@
-All programs are designed solely for the purpose of Allstate (Hale Insurance Inc) and Yumio Inc
+All programs are designed solely for the purpose of Hale Insurance Inc
