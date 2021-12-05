@@ -289,9 +289,27 @@ def square_footage(client_line):
 with open(PATH, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
     first_line = next(csv_reader)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Maps function ensure the threads called first are executed first
-        all_info = [client_line for client_line in executor.map(add_list, csv_reader)]
+
+df=pd.read_csv(PATH)
+
+first_name = df["First Name"].tolist()
+last_name = df["Last Name"].tolist()
+street_address = df["Street Address"].tolist()
+city = df["City"].tolist()
+state = df["State"].tolist()
+zip = df["Zip"].tolist()
+phone = df["Phone"].tolist()
+mail_status = df["Mail Status"].tolist()
+call_status = df["Call Status"].tolist()
+wireless_landline = df["Wireless or Landline Phone Number"].tolist()
+customer_status = df["Customer Status"].tolist()
+home_built_yr = df["Year Home Built"].tolist()
+home_size = df["Home Size"].tolist()
+estimated_value = df["Estimated Home Value"].tolist()
+sale_date = df["Home Sale Date"].tolist()
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    # Maps function ensure the threads called first are executed first
+    all_info = [client_line for client_line in executor.map(add_list, csv_reader)]
 tuple(all_info)
 
 # Calls function to get bar to set to
