@@ -166,11 +166,11 @@ def add_list(line):
                                     taxpayer_list_name[0] = name_list_2[1].title()
                                     taxpayer_list_name[1] = name_list_2[0].title()
                                     beenthrough = False
-                                elif len(name_list_2) >= 2 and len(name_list_2[1]) == 1:
+                                elif len(name_list_2) > 2 and len(name_list_2[1]) == 1:
                                     taxpayer_list_name[0] = name_list_2[2].title()
                                     taxpayer_list_name[1] = name_list_2[0].title()
                                     beenthrough = False
-                                elif len(name_list_2) >= 2 and len(name_list_2[1]) != 1:
+                                elif len(name_list_2) > 2 and len(name_list_2[1]) != 1:
                                     taxpayer_list_name[0] = name_list_2[1].title()
                                     taxpayer_list_name[1] = name_list_2[0].title()
                                     beenthrough = False
