@@ -9,7 +9,6 @@ import csv
 import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
-from sklearn.exceptions import DataDimensionalityWarning
 
 # Message is to inform user about program operations
 print(
@@ -215,8 +214,8 @@ def square_footage(client_line):
         # Takes square_ft data from clients
         pin_id = client_line.mod_pin_id
         present_use_lower = client_line.mod_pres.lower()
-        first_name = client_line._client.__first.lower()
-        last_name = client_line._client.__last.lower()
+        first_name = client_line._Client__first.lower()
+        last_name = client_line._Client__last.lower()
         ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises")
         def func():
             if first_name in ban_list or last_name in ban_list:
