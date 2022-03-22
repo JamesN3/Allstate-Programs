@@ -94,6 +94,14 @@ class Client:
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
 def square_call(square_bar=1980, all_info=tuple()):
+    ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises")
+    def tax_name_check(client_line):
+        first_name_tax = client_line.mod_first.lower()
+        last_name_tax = client_line.mod_last.lower()
+        if first_name_tax in ban_list or last_name_tax in ban_list:
+            return False
+        return True
+
     def square_limit(square_bar_test, all_info):
         num_square_ft = 0
         info_index = 0
@@ -105,6 +113,7 @@ def square_call(square_bar=1980, all_info=tuple()):
                     and "apartment" not in present_use
                     and "mobile home" not in present_use
                     and "townhouse" not in present_use
+                    and tax_name_check(client_line) == True
                 ):
                     if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
@@ -217,7 +226,7 @@ def square_footage(client_line):
         first_name_tax = client_line.mod_first.lower()
         last_name_tax = client_line.mod_last.lower()
         ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises")
-        def func():
+        def tax_check_name():
             if first_name_tax in ban_list or last_name_tax in ban_list:
                 return False
             return True
@@ -226,7 +235,7 @@ def square_footage(client_line):
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
             and "townhouse" not in present_use_lower
-            and func() == True
+            and tax_check_name() == True
         ):
             square_ft = client_line._Client__home_size
             if square_ft <= square_bar:
