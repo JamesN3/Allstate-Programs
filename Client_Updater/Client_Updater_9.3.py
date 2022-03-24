@@ -94,14 +94,6 @@ class Client:
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
 def square_call(square_bar=1980, all_info=tuple()):
-    ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises")
-    def tax_name_check(client_line):
-        first_name_tax = client_line.mod_first.lower()
-        last_name_tax = client_line.mod_last.lower()
-        if first_name_tax in ban_list or last_name_tax in ban_list:
-            return False
-        return True
-
     def square_limit(square_bar_test, all_info):
         num_square_ft = 0
         info_index = 0
@@ -113,7 +105,8 @@ def square_call(square_bar=1980, all_info=tuple()):
                     and "apartment" not in present_use
                     and "mobile home" not in present_use
                     and "townhouse" not in present_use
-                    and tax_name_check(client_line) == True
+                    and "medical" not in present_use
+                    and "dental" not in present_use
                 ):
                     if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
@@ -140,6 +133,12 @@ def add_list(line):
     last_name = client_line._Client__last
 
     def requester():
+        ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks")
+        def tax_check_name(tax_name):
+            for name in tax_name:
+                if name in ban_list or name in ban_list:
+                    return False
+            return True
         try:
             # Takes pin_id or parcel number required to access web data and urls
             pin_id = requests.get(
@@ -165,6 +164,10 @@ def add_list(line):
                     for name1 in name_list_1:
                         name1 = name1.strip()
                         name_list_2 = name1.split(" ")
+                        if tax_check_name(name_list_2) == False:
+                            taxpayer_list_name[0] = ""
+                            taxpayer_list_name[1] = ""
+                            break
                         if last_name.lower() == name_list_2[0].lower():
                             taxpayer_list_name[0] = ""
                             taxpayer_list_name[1] = ""
@@ -223,19 +226,13 @@ def square_footage(client_line):
         # Takes square_ft data from clients
         pin_id = client_line.mod_pin_id
         present_use_lower = client_line.mod_pres.lower()
-        first_name_tax = client_line.mod_first.lower()
-        last_name_tax = client_line.mod_last.lower()
-        ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises")
-        def tax_check_name():
-            if first_name_tax in ban_list or last_name_tax in ban_list:
-                return False
-            return True
         if (
             "condo" not in present_use_lower
             and "apartment" not in present_use_lower
             and "mobile home" not in present_use_lower
             and "townhouse" not in present_use_lower
-            and tax_check_name() == True
+            and "medical" not in present_use_lower
+            and "dental" not in present_use_lower
         ):
             square_ft = client_line._Client__home_size
             if square_ft <= square_bar:
