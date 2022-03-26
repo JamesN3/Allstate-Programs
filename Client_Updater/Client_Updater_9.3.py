@@ -107,6 +107,7 @@ def square_call(square_bar=1980, all_info=tuple()):
                     and "townhouse" not in present_use
                     and "medical" not in present_use
                     and "dental" not in present_use
+                    and "industrial" not in present_use
                 ):
                     if client_line._Client__home_size <= square_bar_test:
                         num_square_ft += 1
@@ -133,10 +134,10 @@ def add_list(line):
     last_name = client_line._Client__last
 
     def requester():
-        ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks")
+        ban_list = ("trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks", "national", "transfer", "toll")
         def tax_check_name(tax_name):
             for name in tax_name:
-                if name in ban_list or name in ban_list:
+                if name.lower() in ban_list:
                     return False
             return True
         try:
@@ -233,6 +234,7 @@ def square_footage(client_line):
             and "townhouse" not in present_use_lower
             and "medical" not in present_use_lower
             and "dental" not in present_use_lower
+            and "industrial" not in present_use_lower
         ):
             square_ft = client_line._Client__home_size
             if square_ft <= square_bar:
