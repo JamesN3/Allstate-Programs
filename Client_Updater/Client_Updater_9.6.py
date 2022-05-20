@@ -198,7 +198,10 @@ def add_list(line):
             client_line.mod_first = taxpayer_list_name[0]
             client_line.mod_last = taxpayer_list_name[1]
             client_line.mod_pres = present_use
-            client_line.mod_full = taxpayer_name
+            if beenthrough:
+                client_line.mod_full = ""
+            else:
+                client_line.mod_full = taxpayer_name
             client_line.mod_url = url
             client_line.mod_pin_id = pin_id
         except:
