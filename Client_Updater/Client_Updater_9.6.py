@@ -163,6 +163,7 @@ def add_list(line):
             present_use = source["items"][0]["PRESENTUSE"]
             # Parse more accurately
             taxpayer_list_name = ["",""]
+            beenthrough = False
             if len(taxpayer_name) > 0:
                 if str(last_name).lower() not in taxpayer_name.lower():
                     parsers = ("+", "and", "AND", "And")
@@ -176,7 +177,6 @@ def add_list(line):
                         if tax_check_name(name_list_2) == False:
                             taxpayer_list_name[0] = ""
                             taxpayer_list_name[1] = ""
-                            break
                         if last_name.lower() == name_list_2[0].lower():
                             taxpayer_list_name[0] = ""
                             taxpayer_list_name[1] = ""
