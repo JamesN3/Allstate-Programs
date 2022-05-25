@@ -4,8 +4,8 @@
 # Program takes prexisting client data and adds the client's
 # Housing Square Footage(Potentially), Present Use, and property detail url
 
+import pandas as pd
 import requests
-import csv
 import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
@@ -33,10 +33,8 @@ while not path.exists(PATH):
 last_index = PATH.rfind("\\")
 new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 
-
 # The message that is sent when an error occurs
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-
 
 class Client:
     def __init__(self, line):
@@ -101,7 +99,7 @@ def present_use_filter(present_use_lower):
 
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
-def square_call(square_bar=2000, all_info=tuple()):
+def square_call(square_bar, all_info):
     def square_limit(square_bar_test, all_info):
         num_square_ft = 0
         info_index = 0
@@ -125,9 +123,7 @@ def square_call(square_bar=2000, all_info=tuple()):
             return square_bar - 10
         return square_call(square_bar - 10, all_info)
 
-
-# Function that threads use
-def add_list(line):
+def api_data(line):
     # Take address and converts to search friendly form
     # Converts spaces " " to "%20"
     client_line = Client(line)
@@ -211,109 +207,28 @@ def add_list(line):
         if client_line.mod_passthrough:
             requester()
     return client_line
+df = pd.read_csv(PATH)
+
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    # Maps function ensure the threads called first are executed first
+    all_info = [client_line for client_line in executor.map(api_data, df.iteritems())]
 
 
-def square_footage(client_line):
-    if client_line.mod_passthrough:
-        # Takes square_ft data from clients
-        pin_id = client_line.mod_pin_id
-        present_use_lower = client_line.mod_pres.lower()
-        new_square_ft = ""
-        new_year_built = ""
-        if (
-            present_use_filter(present_use_lower)
-        ):
-            square_ft = client_line._Client__home_size
-            if square_ft <= square_bar:
-                try:
-                    # Takes request for square footage
-                    source = requests.get(
-                        f"https://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr={pin_id}"
-                    ).text
-                    # Takes text element using Beautfiul Soup
-                    soup = BeautifulSoup(source, "lxml")
-                    # Parses through html to find correct source
-                    table1 = soup.find("table", id="container")
-                    table2 = table1.find("table", id="cphContent_DetailsViewPropTypeR")
-                    tr_sqft = table2.find_all("tr")[1]
-                    tr_yr = table2.find_all("tr")[0]
-                    try:
-                        header_sqft = tr_sqft.find_all("td")[0].text.lower()
-                        if header_sqft == "total square footage":
-                            new_square_ft = tr_sqft.find_all("td")[1].text
-                        else:
-                            new_square_ft = "Error"
-                        header_yr = tr_yr.find_all("td")[0].text.lower()
-                        if header_yr == "year built":
-                            new_year_built = tr_yr.find_all("td")[1].text
-                        else:
-                            new_year_built = "Error"
-                    except:
-                        new_square_ft = "Error"
-                        new_year_built = "Error"
-                        # Loops through tr tags in table
-                        tr = table2.find_all("tr")
-                        for value in tr:
-                            try:
-                                header_sqft = value.find_all("td")[0].text.lower()
-                                # Sees if header is correct then will append
-                                if header_sqft == "total square footage":
-                                    new_square_ft = value.find_all("td")[1].text
-                                    break
-                            except:
-                                pass
-                        for value in tr:
-                            try:
-                                header_yr = value.find_all("td")[0].text.lower()
-                                if header_yr == "year built":
-                                    new_year_built = value.find_all("td")[1].text
-                                    break
-                            except:
-                                pass
-                except:
-                    new_square_ft = "Error"
-                    new_year_built = "Error"
-        client_line.mod_sqft = new_square_ft
-        client_line.mod_yr = new_year_built
-        return client_line.final_packager()
-    else:
-        return client_line.final_packager()
 
 
-with open(PATH, "r") as csv_file:
-    csv_reader = csv.reader(csv_file)
-    first_line = next(csv_reader)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Maps function ensure the threads called first are executed first
-        all_info = [client_line for client_line in executor.map(add_list, csv_reader)]
-tuple(all_info)
 
-# Calls function to get bar to set to
-square_bar = square_call(square_bar=2000, all_info=all_info)
 
-# Reminder to ensure program does not stop in execution
-print("Reminder: Do not open the csv file that is being read or written!")
 
-with open(new_PATH, "w") as new_file:
-    csv_writer = csv.writer(new_file, delimiter=",", lineterminator="\n")
-    # Adds additional elements to top row of csv data
-    first_line.extend(
-        (
-            "Mod-Taxpayer First",
-            "Mod-Taxpayer Last",
-            "Mod-Full",
-            "Mod-Year Built",
-            "Mod-Real Square Footage",
-            "Mod-Present Use",
-            "Mod-URL",
-        )
-    )
-    csv_writer.writerow(first_line)
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        # Maps function ensure the threads called first are executed first
-        for line in executor.map(square_footage, all_info):
-            csv_writer.writerow(line)
-print("Finished!")
 
-if __name__ != "__main__":
-    quit()
+
+
+# new_column_names = (tuple(df.columns),
+#             "Mod-Taxpayer First",
+#             "Mod-Taxpayer Last",
+#             "Mod-Full",
+#             "Mod-Year Built",
+#             "Mod-Real Square Footage",
+#             "Mod-Present Use",
+#             "Mod-URL",
+#         )
+# df.to_csv(f'new_{PATH}.csv', index=False, header=new_column_names)
