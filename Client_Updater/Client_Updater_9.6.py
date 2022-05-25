@@ -101,7 +101,7 @@ def present_use_filter(present_use_lower):
 
 # Main function that is called to determine the bar that should be set to
 # maximize collection of housing square footage data
-def square_call(square_bar=1980, all_info=tuple()):
+def square_call(square_bar=2000, all_info=tuple()):
     def square_limit(square_bar_test, all_info):
         num_square_ft = 0
         info_index = 0
@@ -140,10 +140,7 @@ def add_list(line):
         def tax_check_name(tax_name):
             for name in tax_name:
                 if name.lower() in ban_set:
-                    return False
-                # for num in range(0,10):
-                #     if num in name.lower():
-                #         return False       
+                    return False  
             return True
 
         try:
@@ -164,35 +161,29 @@ def add_list(line):
             # Parse more accurately
             taxpayer_list_name = ["",""]
             beenthrough = False
-            if len(taxpayer_name) > 0:
-                if str(last_name).lower() not in taxpayer_name.lower():
-                    parsers = ("+", "and", "AND", "And")
-                    for element in parsers:
-                        taxpayer_name = taxpayer_name.replace(element, "&")
-                    name_list_1 = taxpayer_name.split("&")
-                    beenthrough = True
-                    for name1 in name_list_1:
-                        name1 = name1.strip()
-                        name_list_2 = name1.split(" ")
-                        if tax_check_name(name_list_2) == False:
-                            taxpayer_list_name[0] = ""
-                            taxpayer_list_name[1] = ""
-                        if last_name.lower() == name_list_2[0].lower():
-                            taxpayer_list_name[0] = ""
-                            taxpayer_list_name[1] = ""
-                            break
-                        else:
-                            if beenthrough:
-                                if len(name_list_2) >= 2:
-                                    taxpayer_list_name[0] = name_list_2[1].title()
-                                    taxpayer_list_name[1] = name_list_2[0].title()
-                                    beenthrough = False
-                else:
-                    taxpayer_list_name[0] = ""
-                    taxpayer_list_name[1] = ""
-            else:
-                taxpayer_list_name[0] = ""
-                taxpayer_list_name[1] = ""
+            if len(taxpayer_name) > 0 and str(last_name).lower() not in taxpayer_name.lower():
+                parsers = ("+", "and", "AND", "And")
+                for element in parsers:
+                    taxpayer_name = taxpayer_name.replace(element, "&")
+                name_list_1 = taxpayer_name.split("&")
+                beenthrough = True
+                for name1 in name_list_1:
+                    name1 = name1.strip()
+                    name_list_2 = name1.split(" ")
+                    if tax_check_name(name_list_2) == False:
+                        taxpayer_list_name[0] = ""
+                        taxpayer_list_name[1] = ""
+                        break
+                    if last_name.lower() == name_list_2[0].lower():
+                        taxpayer_list_name[0] = ""
+                        taxpayer_list_name[1] = ""
+                        break
+                    else:
+                        if beenthrough:
+                            if len(name_list_2) >= 2:
+                                taxpayer_list_name[0] = name_list_2[1].title()
+                                taxpayer_list_name[1] = name_list_2[0].title()
+                                beenthrough = False
             # Signifies that process was successful to move onto access square footage data
             client_line.mod_passthrough = True
             client_line.mod_first = taxpayer_list_name[0]
@@ -239,6 +230,8 @@ def square_footage(client_line):
         # Takes square_ft data from clients
         pin_id = client_line.mod_pin_id
         present_use_lower = client_line.mod_pres.lower()
+        new_square_ft = ""
+        new_year_built = ""
         if (
             present_use_filter(present_use_lower)
         ):
@@ -292,14 +285,6 @@ def square_footage(client_line):
                 except:
                     new_square_ft = "Error"
                     new_year_built = "Error"
-            else:
-                # Appends dashes to maintain csv structure
-                new_square_ft = ""
-                new_year_built = ""
-        else:
-            # Appends dashes to maintain csv structure
-            new_square_ft = ""
-            new_year_built = ""
         client_line.mod_sqft = new_square_ft
         client_line.mod_yr = new_year_built
         return client_line.final_packager()
@@ -316,7 +301,7 @@ with open(PATH, "r") as csv_file:
 tuple(all_info)
 
 # Calls function to get bar to set to
-square_bar = square_call(square_bar=1980, all_info=all_info)
+square_bar = square_call(square_bar=2000, all_info=all_info)
 
 # Reminder to ensure program does not stop in execution
 print("Reminder: Do not open the csv file that is being read or written!")
