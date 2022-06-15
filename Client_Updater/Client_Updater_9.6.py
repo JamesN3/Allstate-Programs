@@ -175,6 +175,7 @@ def add_list(line):
                     else:
                         if len(name_list_2) >= 2:
                             taxpayer_list_name[0] = name_list_2[1].title()
+                            taxpayer_list_name[1] = name_list_2[0].title()
             # Signifies that process was successful to move onto access square footage data
             client_line.mod_passthrough = True
             client_line.mod_first = taxpayer_list_name[0]
