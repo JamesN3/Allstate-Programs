@@ -2,7 +2,7 @@
 # Program built solely for the use of Allstate Hale Insurance Inc
 #
 # Program takes prexisting client data and adds the client's
-# Housing Square Footage(Potentially), Present Use, and property detail url
+# Housing Square Footage(if num_square_ft<1000), Present Use, and property detail url
 
 import requests
 import csv
