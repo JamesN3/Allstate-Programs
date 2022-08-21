@@ -17,7 +17,7 @@ print(
     ""
 )
 
-# Takes the PATH of the csv file
+# Takes the PATH of the csv file and stores info in constant PATH
 PATH = str(
     input("Insert file path\nEx: C:\\Users\\Allstate\\Downloads\\August2021.csv\n")
 )
@@ -34,11 +34,12 @@ last_index = PATH.rfind("\\")
 new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 
 
-# The message that is sent when an error occurs
+# Error message for data XHR request collection error
 error_message = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
 
-
 class Client:
+
+    # Initalizes all variables for object storing prospective client's data
     def __init__(self, line):
         self.__first = line[0]
         self.__last = line[1]
@@ -55,6 +56,8 @@ class Client:
         self.__home_size = int(line[13])
         self.__estimated_value = line[14]
         self.__home_sale_date = line[15]
+
+        # Mod suffix indicates these data types are appended by new API data collected by program
         self.mod_passthrough = False
         self.mod_first = ""
         self.mod_last = ""
