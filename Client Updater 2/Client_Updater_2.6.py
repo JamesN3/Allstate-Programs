@@ -58,11 +58,19 @@ class Client:
         self.__home_sale_date = line[15]
 
         # Mod suffix indicates these data types are appended by new API data collected by program
-        self.mod_passthrough = False
-        self.mod_first = ""
+
+        # Variable is a booean which indicates the amount of success in the data collection process
+        self.mod_passthrough = False 
+
+        # Data collected first/last name
+        self.mod_first = "" 
         self.mod_last = ""
         self.mod_full = ""
+
+        # Data collected year of construction for insurance property
         self.mod_yr = ""
+
+        # Data collected square footage of property
         self.mod_sqft = ""
         self.mod_pres = ""
         self.mod_url = error_message
