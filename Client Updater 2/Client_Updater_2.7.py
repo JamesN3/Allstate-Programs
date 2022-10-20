@@ -111,7 +111,7 @@ class Client:
 # Uses set comparison to determine if the present use of the building is a possible prospetive client
 def present_use_filter(present_use_lower):
     # The following set contains present uses which are considered uninsurable
-    ban_present_use = {"condo", "apartment", "townhouse", "medical", "dental", "industrial"}
+    ban_present_use = {"condo", "apartment", "townhouse", "medical", "dental", "industrial", "corportation", "estates"}
     for ban_item in ban_present_use:
         if ban_item in present_use_lower:
             return False
@@ -180,8 +180,8 @@ def add_list(line):
             # Parse more accurately
             taxpayer_list_name = ["",""]
             if len(taxpayer_name) > 0 and str(last_name).lower() not in taxpayer_name.lower():
-                parsers = ("+", "and", "AND", "And", " ")
-                for element in parsers:
+                parsers1 = ("+", "and", "AND", "And", " ")
+                for element in parsers1:
                     taxpayer_name1 = taxpayer_name.replace(element, "&")
                 name_list_1 = taxpayer_name1.split("&")
                 if tax_check_name(name_list_1) == False: 
@@ -191,9 +191,38 @@ def add_list(line):
                             taxpayer_list_name[1] = ""
                             break
                 else:
-                    parsers = ("+", "and", "AND", "And")
-                    for element in parsers:
+                    parsers2 = ("+", "and", "AND", "And")
+                    for element in parsers2:
                         taxpayer_name2 = taxpayer_name.replace(element, "&")
+                        name_list_2 = taxpayer_name2.split("&")
+                        min_char = 999
+                        min_char_index = 0
+                        #-----------------------
+                        # Major error as no name is initally picked to further execute
+                        for n in range(0, len(name_list_2)):
+                            name_list_3 = name_list_2[n].split(" ")
+                            for char in name_list_3[n]:
+                                if len(char) < len(min_char):
+                                    min_char = char
+                                    min_char_index = n
+                    if min_char_index == 0:    
+                        name_list_3 = name_list_2[1].split(" ")
+                    else:    
+                        name_list_3 = name_list_2[0].split(" ")
+                    max1 = 0
+                    max2 = 0
+                    max_index1 = 0
+                    max_index2 = 0
+                    for n in range(0,len(name_list_2)):
+                        if  name_list_3[n] > max1:
+                            max1 = len(name_list_3[n])
+                            max2 = max1
+                            max_index1 = n
+                            max_index2 = max_index1
+                        elif len(name_list_3[n]) > max2:
+                            max2 = len(name_list_3[n])
+                            max_index2 = n
+
                     # Search for names without a single character
                     # Make ranking algorithm of preferences
 
