@@ -3,6 +3,9 @@
 #
 # Program takes prexisting client data and adds the client's
 # Housing Square Footage(if num_square_ft<1000), Present Use, and property detail url
+#
+# Data collection source
+# https://gismaps.kingcounty.gov/parcelviewer2/
 
 import requests
 import csv
@@ -72,8 +75,12 @@ class Client:
 
         # Data collected square footage of property
         self.mod_sqft = ""
+
+        # Indicates the present use of the property (e.g: Single Family Residence, Medical Use...)
         self.mod_pres = ""
         self.mod_url = error_message
+
+        # Data point containing access code to gather data from King County Parcel Viewer API
         self.mod_pin_id = ""
 
     def final_packager(self):
@@ -103,15 +110,18 @@ class Client:
             self.mod_url,
         )
 
+# Uses set comparison to determine if the present use of the building is a possible prospetive client
 def present_use_filter(present_use_lower):
-    ban_present_use = ("condo", "apartment", "townhouse", "medical", "dental", "industrial")
+    # The following set contains present uses which are considered uninsurable
+    ban_present_use = {"condo", "apartment", "townhouse", "medical", "dental", "industrial", "corportation", "estates"}
     for ban_item in ban_present_use:
         if ban_item in present_use_lower:
             return False
     return True
 
-# Main function that is called to determine the bar that should be set to
-# maximize collection of housing square footage data
+# square_call function is called to determine the square footage maximum bar that should be set for data collection
+# As of September 2021 max collection is 1000 data points
+# Implementation uses recursive optimizer to cycle for max collection square footage
 def square_call(square_bar=2000, all_info=tuple()):
     def square_limit(square_bar_test, all_info):
         num_square_ft = 0
@@ -200,7 +210,7 @@ def add_list(line):
 
     requester()
     if client_line.mod_passthrough == False:
-        # Dictionary that is circled through to see if search result can be recovered
+        # Dictionary that is looped through to see if search result can be recovered
         abb_dict = {
             "mt": "mountain",
             "mount": "mt",
