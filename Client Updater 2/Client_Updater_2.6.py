@@ -157,7 +157,7 @@ def add_list(line):
     last_name = client_line._Client__last
 
     def requester():
-        ban_set = {"city", "inc", "ltd", "trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "relocatio","holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks", "national", "transfer", "toll"}
+        ban_set = {"city", "inc", "ltd", "trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "relocatio","holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks", "national", "transfer", "toll", "ttee"}
         def tax_check_name(tax_name):
             for name in tax_name:
                 if name.lower() in ban_set:
