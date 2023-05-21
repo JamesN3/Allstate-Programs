@@ -1,6 +1,7 @@
 from filter import present_use_filter, tax_check_name
 
-def tax_parse():
+def tax_parse(client):
+    last_name = client._Client__last
     taxpayer_list_name = ["",""]
     if len(taxpayer_name) > 0 and str(last_name).lower() not in taxpayer_name.lower():
         parsers = ("+", "and", "AND", "And")
@@ -19,6 +20,6 @@ def tax_parse():
                     taxpayer_list_name[0] = name_list_2[1].title()
                     taxpayer_list_name[1] = name_list_2[0].title()
         # Signifies that process was successful to move onto access square footage data
-        client_line.mod_passthrough = True
-        client_line.mod_first = taxpayer_list_name[0]
-        client_line.mod_last = taxpayer_list_name[1]
+        client.mod_passthrough = True
+        client.mod_first = taxpayer_list_name[0]
+        client.mod_last = taxpayer_list_name[1]

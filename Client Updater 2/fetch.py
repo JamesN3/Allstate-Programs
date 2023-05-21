@@ -15,26 +15,26 @@ def fetch(address):
         present_use = source["items"][0]["PRESENTUSE"]
         return taxpayer_name, present_use, url, pin_id
     except RuntimeError:
-        print("Runtime Error in fetch.py")
+        print("Runtime Error in fetch.py\n")
         raise
     except KeyError:
-        print("Key Error in fetch.py")
+        print("Key Error in fetch.py\n")
         raise
     except requests.HTTPError:
-        print("HTTP Error in fetch.py")
+        print("HTTP Error in fetch.py\n")
         raise
     except requests.ConnectionError:
-        print("Connection Error in fetch.py")
+        print("Connection Error in fetch.py\n")
         raise
     except requests.Timeout:
-        print("Timeout Error in fetch.py")
+        print("Timeout Error in fetch.py\n")
         raise
     except requests.InvalidURL:
-        print("Invalid URL in fetch.py")
+        print("Invalid URL in fetch.py\n")
         raise
     except requests.InvalidProxyURL:
-        print("Invalid ProxyURL in fetch.py")
+        print("Invalid ProxyURL in fetch.py\n")
         raise
     except:
-        print("Unknown Error in fetch.py")
+        print("Unknown Error in fetch.py\n")
         raise
