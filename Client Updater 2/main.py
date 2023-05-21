@@ -12,11 +12,11 @@ import csv
 import concurrent.futures
 from os import path
 from bs4 import BeautifulSoup
-from json import load
 from filter import *
 from sqft_optimizer import *
 from fetch import *
 from taxpayer_name_parser import *
+from Client import Client
 
 def main():
     # Message is to inform user about program operations
@@ -42,77 +42,8 @@ def main():
     last_index = PATH.rfind("\\")
     new_PATH = f"{PATH[0 : last_index + 1]}new_{PATH[last_index + 1 :]}"
 
-    class Client:
-        # Initalizes all variables for object storing prospective client's data
-        def __init__(self, line):
-            self.__first = line[0]
-            self.__last = line[1]
-            self.__address = line[2]
-            self.__city = line[3]
-            self.__state = line[4]
-            self.__zipcd = line[5]
-            self.__phone = line[6]
-            self.__mailstat = line[8]
-            self.__callstat = line[9]
-            self.__phonestat = line[10]
-            self.__custstat = line[11]
-            self.__homeyr = line[12]
-            self.__home_size = int(line[13])
-            self.__estimated_value = line[14]
-            self.__home_sale_date = line[15]
-
-            # Mod suffix indicates these data types are appended by new API data collected by program
-
-            # Variable is a booean which indicates the amount of success in the data collection process
-            self.mod_passthrough = False 
-
-            # Data collected first/last name
-            self.mod_first = "" 
-            self.mod_last = ""
-            self.mod_full = ""
-
-            # Data collected year of construction for insurance property
-            self.mod_yr = ""
-
-            # Data collected square footage of property
-            self.mod_sqft = ""
-
-            # Indicates the present use of the property (e.g: Single Family Residence, Medical Use...)
-            self.mod_pres = ""
-            self.mod_url = "Error — Refer to https://blue.kingcounty.com/assessor/erealproperty/ErrorDefault.htm?aspxerrorpath=/Assessor/eRealProperty/Detail.aspx"
-
-            # Data point containing access code to gather data from King County Parcel Viewer API
-            self.mod_pin_id = ""
-
-        def final_packager(self):
-            return (
-                self.__first,
-                self.__last,
-                self.__address,
-                self.__city,
-                self.__state,
-                self.__zipcd,
-                self.__phone,
-                "",
-                self.__mailstat,
-                self.__callstat,
-                self.__phonestat,
-                self.__custstat,
-                self.__homeyr,
-                self.__home_size,
-                self.__estimated_value,
-                self.__home_sale_date,
-                self.mod_first,
-                self.mod_last,
-                self.mod_full,
-                self.mod_yr,
-                self.mod_sqft,
-                self.mod_pres,
-                self.mod_url,
-            )
-
     # Function that threads use
-    def threader(line):
+    def threader1(line):
         # Take address and converts to search friendly form
         # Converts spaces " " to "%20"
         client = Client(line)
@@ -132,30 +63,27 @@ def main():
                     client.mod_full = taxpayer_name
                     client.mod_url = url
                     client.mod_pin_id = pin_id
+                    client.mod_passthrough = True
                     tax_parse(client)
         else:
             client.mod_pres = present_use
             client.mod_full = taxpayer_name
             client.mod_url = url
             client.mod_pin_id = pin_id
+            client.mod_passthrough = True
             tax_parse(client)
         finally:
             return client
 
 
-    def square_footage(client):
-        if not client.mod_passthrough:
+    def threader2_sqft(client):
+        if not square_footage_filter(client, square_bar):
             return client
         # Takes square_ft data from clients
         pin_id = client.mod_pin_id
         present_use_lower = client.mod_pres.lower()
         new_square_ft = ""
         new_year_built = ""
-        if not present_use_filter(present_use_lower):
-            return client
-        square_ft = client._Client__home_size
-        if square_ft > square_bar:
-            return client
         try:
             # Takes request for square footage
             source = requests.get(
@@ -215,14 +143,15 @@ def main():
         first_line = next(csv_reader)
         with concurrent.futures.ThreadPoolExecutor() as executor:
             # Maps function ensure the threads called first are executed first
-            clients = [client_line for client_line in executor.map(threader, csv_reader)]
+            clients = [client_line for client_line in executor.map(threader1, csv_reader)]
 
     # Calls function to get bar to set to
     square_bar = square_call(2000, clients)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
+        print("Scrapping Square Footage\n")
         # Maps function ensure the threads called first are executed first
-        clients = [client for client in executor.map(square_footage, clients)]
+        clients = [client for client in executor.map(threader2_sqft, clients)]
         
     # Reminder to ensure program does not stop in execution
     print("Reminder: Do not open the csv file that is being read or written!")

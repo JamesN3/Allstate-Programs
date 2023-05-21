@@ -4,7 +4,7 @@ from filter import present_use_filter
 # As of September 2021 max collection is 1000 data points
 # Implementation uses recursive optimizer to cycle for max collection square footage
 def square_call(square_bar, clients):
-    print("sqft optimizing")
+    print("Calculating Optimal Square Footage\n")
     def square_limit(square_bar_test):
         num_square_ft = 0
         for client_line in clients:
@@ -23,7 +23,7 @@ def square_call(square_bar, clients):
             square_bar += 10
             num_square_ft = square_limit(square_bar)
         return square_bar-10
-    if num_square_ft > 1000:
+    elif num_square_ft > 1000:
         while (num_square_ft > 1000):
             square_bar -= 10
             num_square_ft = square_limit(square_bar)

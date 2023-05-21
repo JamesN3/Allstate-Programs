@@ -35,3 +35,14 @@ def abb_list(address):
             address = address.replace(abbreviation, full)
     
     return address
+
+def square_footage_filter(client, square_bar):
+    # Takes square_ft data from clients
+    pin_id = client.mod_pin_id
+    present_use_lower = client.mod_pres.lower()
+    new_square_ft = ""
+    new_year_built = ""
+    square_ft = client._Client__home_size
+    if square_ft > square_bar or (not client.mod_passthrough) or (not present_use_filter(present_use_lower)):
+        return False
+    return True
