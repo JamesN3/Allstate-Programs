@@ -13,12 +13,22 @@ abb_dict = {
             "shangrila": "shangri la",
             "shoreclub": "shore club",
         }
-
+"""
+returns false if the tax name contains a banned word
+returns true if the tax name does not contain a banned word
+"""
 def tax_check_name(tax_name):
+    tax_name = tax_name.lower()
+    for ban_name in ban_tax_name:
+        if ban_name in tax_name:
+            return False
+    return True
+    """
     for name in tax_name:
         if name.lower() in ban_tax_name:
             return False  
     return True
+    """
 
 # Uses set comparison to determine if the present use of the building is a possible prospetive client
 def present_use_filter(present_use_lower):
