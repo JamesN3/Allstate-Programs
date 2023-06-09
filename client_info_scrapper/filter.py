@@ -1,6 +1,6 @@
 # The following set contains present uses which are considered uninsurable
 ban_present_use = {"condo", "apartment", "townhouse", "medical", "dental", "industrial", "corportation", "estates"}
-ban_tax_name = {"city", "inc", "ltd", "trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "relocatio","holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks", "national", "transfer", "toll", "ttee"}
+ban_tax_name = {"city", "inc", "ltd", "trust", "irrevocable", "revocable", "llc", "living", "property", "family", "farm", "bank", "home", "relocation", "relocatio","holdings", "investment", "mortgage", "mutual", "development", "enterprises", "project", "work", "industrial", "county-parks", "national", "transfer", "toll", "ttee", "corporation"}
 abb_dict = {
             "mt": "mountain",
             "mount": "mt",
